@@ -28,6 +28,7 @@
 
 
   <body>
+   <div id="commuteVisualizerApp">
     <div id="right-panel">
       <div class="header">
         <h1><span class="tinyheader">Forrestthewoods</span>Commute Visualizer</h1>
@@ -94,6 +95,16 @@
                 </ul>
               </form>
             </div>
+
+
+            <select v-model="travelTimeHoursSelect">
+              <option v-for="option in travelTimeHouseOptions"
+                      v-bind:value="option">
+                {{ option }}
+              </option>
+            </select>
+
+
 
             <select id="travelTimeHoursSelect">
               <option value="12:00 am">12:00 am</option>  <option value="12:15 am">12:15 am</option>  <option value="12:30 am">12:30 am</option>  <option value="12:45 am">12:45 am</option>
@@ -189,12 +200,14 @@
 
       </div>
     </div>
+   </div>
 
-    <input id="pac-input" class="controls" type="text" placeholder="Search">
+   <input id="pac-input" class="controls" type="text" placeholder="Search">
     <div id="map"></div>
 
-
-    <script src="commute.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.3.2/vue.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/commute.js"></script>
 
     <!-- include google API key here and in commute.js -->
     <script async defer
