@@ -1,0 +1,283 @@
+/* This is not an accessible implementation */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  webkit-font-smoothing: subpixel-antialiased !important;
+}
+body{ 
+  color: #38424E;
+  font-family: 'Karla', sans-serif;
+  font-size: 16px;
+}
+a {
+  color: #0774C8;
+}
+a:hover{
+  color: #2196F0;
+}
+/* LAYOUT */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+#right-panel {
+  overflow: auto;
+  float: right;
+  width: 48vw;
+  height: 100vh;
+  padding: 0 0 3rem 0;
+}
+#map {
+  height: 100%;
+  width: 49vw;
+  border-right: 1px solid #C3D0D6;
+}
+@media (min-width: 650px){
+  #right-panel{
+    width: 49vw;
+    padding: 1rem 1.5rem 3rem .5rem;
+  }   
+}
+@media (min-width: 1000px){
+  #right-panel {
+    width: 38vw;
+    padding-left: 0.25rem;
+  }
+  #map {
+    width: 60vw;
+  }
+}
+#right-panel h1{
+  margin: 0 0 0.65rem 0;
+}
+#right-panel h4{
+  margin-bottom: 0.3rem;
+}
+#right-panel .header{
+  margin-bottom: 3rem;
+}
+#right-panel .blocks{
+  margin-bottom: 1.5rem;
+}
+#right-panel .extra_space{
+  margin-bottom: 3rem;
+}
+#right-panel .block_advSearch_1{
+  margin-bottom: 0.5rem;
+}
+#right-panel .block_advSearch-visible, #right-panel .block_advSearch-hidden{
+  padding: 1rem;
+  border: 1px solid #E6EBEC;
+  background: #F9FBFC;
+}
+#right-panel .block_advSearch-visible{
+  display: block;
+}
+#right-panel .block_advSearch-hidden{
+  display: none;
+}
+#right-panel h1{
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #2F435E;
+}
+
+#right-panel .tinyheader{
+  text-transform: uppercase;
+  font-size: 1rem;
+  font-weight: 400;
+  margin-bottom: -0.25rem;
+  letter-spacing: .05em;
+  display: block;
+}
+
+#right-panel .link_text {
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+#right-panel h3{
+  text-transform: uppercase;
+  font-size: 1rem;
+  letter-spacing: 0.03rem;
+}
+#right-panel h4{
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.03rem;
+}
+#right-panel label{
+  margin-left: 0.5rem;
+}
+#right-panel input#gridSizeField, #right-panel input#searchRadiusField{
+  width: 7.5rem;
+}
+#right-panel select, #right-panel input {
+  font-size: 15px;
+  padding: 0.4rem;
+}
+#right-panel ul li{
+  list-style: none;
+  display: inline-block;
+  margin: 0;
+}
+#right-panel ul.radioOptions {
+  margin: 0;
+  padding: 0;
+}
+#right-panel .radioOptions li{
+  margin: 0.5rem .5rem 0.5rem 0;
+  position: relative;
+}
+#right-panel .radioOptions label, #right-panel .radioOptions input{
+  margin-left: 0;
+}
+#right-panel .radioOptions input[type="radio"], input[type="checkbox"]#specifyTavelTime {
+  position: absolute;
+  top: 0;
+  left: 10px;
+  opacity: 0.001;
+  z-index: 100;
+}
+#right-panel .radioOptions label{
+  z-index: 90;
+  padding: .3rem .5rem;
+  background: #F0F6F9;
+  border: 1px solid #D8E0E4;
+  border-radius: 0.15rem;
+  box-shadow: inset 0 1px 0 0 #FFF;
+  color: #42525E;
+  font-size: 0.8rem;
+  letter-spacing: 0.03rem;
+  text-transform: uppercase;
+  transition: all .15s ease-in;
+}
+#right-panel .radioOptions label:focus{
+  outline: 2px auto #E59700;
+  outline: 5px auto -webkit-focus-ring-color;
+}
+#right-panel .radioOptions label:hover {
+  background: #2196F0;
+  border: 1px solid #0C76C8;
+  box-shadow: inset 0 1px 0 0 #5DB4F7;
+  color: #fff;
+  transition: all .15s ease-in;
+}
+#right-panel .radioOptions input[type="radio"]:checked + label{
+  background: #0774C8;
+  border: 1px solid #015697;
+  box-shadow: none;
+  color: #fff;
+}
+#right-panel #transitModesDiv div:first-child{
+  margin-bottom: .3rem;
+}
+#right-panel .advOpt_enabled, #right-panel .advOpt_disabled, #right-panel .advOpt_Open{
+  margin-left: 0;
+  padding: 0.2rem;
+  letter-spacing: 0.03rem;                
+  text-transform: uppercase;
+}
+#right-panel .advOpt_enabled, #right-panel .advOpt_Open{
+  color: #0774C8;
+  text-decoration: underline;
+  transition: all .15s ease-in;
+}
+#right-panel .advOpt_enabled:hover, #right-panel .advOpt_Open:hover{
+				      color: #2196F0;
+				      transition: all .15s ease-in;
+				    }
+#right-panel .advOpt_disabled{
+  color: #ccc;
+  opacity: 0.45;
+  transition: all .15s ease-in;
+}
+#right-panel .advOpt_enabled::before, #right-panel .advOpt_disabled::before, #right-panel .advOpt_Open::before {
+									       display: inline-block;
+									       margin-right: 0.25rem;
+									     }
+#right-panel .advOpt_enabled::before, #right-panel .advOpt_disabled::before {
+					content: '+';
+				      }
+#right-panel .advOpt_Open::before{
+  content: '-';
+}
+#right-panel #travelTimeDiv{
+  padding-bottom: .5rem;
+}
+#right-panel label.option_disabled{
+  opacity: 0.35;
+}
+#right-panel label.option_disabled:hover{
+  background: #F0F6F9;
+  border: 1px solid #D8E0E4;
+  box-shadow: inset 0 1px 0 0 #FFF;
+  color: #42525E;
+  transition: all .15s ease-in;
+}
+#right-panel #travelTimeDiv div:last-of-type{
+  margin-bottom: 1rem;
+}
+#right-panel i {
+  font-size: 12px;
+}
+#right-panel .btn_pos, #right-panel .btn_neg{
+  padding: 0.5rem .65rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.03rem;
+  text-transform: uppercase;
+  transition: all .15s ease-in;
+} 
+#right-panel .btn_pos{
+  background: #00B582;
+  border: 1px solid #028269;
+  border-radius: 0.15rem;
+  box-shadow: inset 0 1px 0 0 #58C8A8;
+  color: #fff;
+  font-size: 0.8rem;
+  letter-spacing: 0.03rem;
+  text-transform: uppercase;
+}
+#right-panel .btn_pos:hover{
+  background: #008C84;
+  border: 1px solid #006061;
+  box-shadow: inset 0 1px 0 0 #50AAA5;
+  transition: all .15s ease-in;
+}
+#right-panel .btn_neg{
+  border: none;
+  background: none;
+  color: #E53935;
+}
+#right-panel .btn_neg:hover{
+  color: #B71C1C;
+  text-decoration: underline;
+  transition: all .15s ease-in;
+}
+#output {
+  font-size: 11px;
+}
+
+/* SEARCH BAR */
+#pac-input {
+  position: absolute;
+  top: 1.5vh;
+  left: 20vw;
+  z-index: 1000!important;
+  width: 25vw;
+  padding: 6px 10px;
+  background-color: #fff;
+  border: 1px solid #C8CFD2;
+  border-radius: 0.15rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  font-size: 13px;
+  text-overflow: ellipsis;
+}
+#pac-input:focus {
+  border-color: #4d90fe;
+}
