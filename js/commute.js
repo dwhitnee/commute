@@ -388,10 +388,10 @@ function initialize() {
   staticMapCanvas = canvas.getContext('2d');
 
   // Initialize UI date/time
-  var currentDate = new Date();
-  var tomorrow = new Date(currentDate.getTime() + 86400000);
-  travelTimeDaySelect.selectedIndex = tomorrow.getDate() - 1;
-  travelTimeMonthSelect.selectedIndex = tomorrow.getMonth();
+  // var currentDate = new Date();
+  // var tomorrow = new Date(currentDate.getTime() + 86400000);
+  // travelTimeDaySelect.selectedIndex = tomorrow.getDate() - 1;
+  // travelTimeMonthSelect.selectedIndex = tomorrow.getMonth();
 
 
   // UI callbacks
