@@ -769,15 +769,15 @@ function Calculate() {
       queryTimeDate.setUTCSeconds(queryTimeUTC);
 
       calculateTargets();
-    }
+    };
 
     request.onerror = function() {
       calculateTargets();
-    }
+    };
 
     request.open("GET", url, true);
     request.send();
-  }
+  };
 
 
   var calculateTargets = function() {

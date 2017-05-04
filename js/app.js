@@ -7,7 +7,7 @@ new Vue({
   // update these values, rather than update the DOM directly
   data: {
     message: "Hello!",
-    travelTimeHour: "05:00 PM",
+    travelTimeHour: "5:00 PM",
     travelTimeDay: Date.today().getDay(),
     travelTimeMonth: Date.today().toString("MMM"),
     travelTimeYear: Date.today().toString("yyyy")
