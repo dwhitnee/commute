@@ -40,7 +40,7 @@ new Vue({
 
   watch: {
     // update URL (seems silly to update URL on any change, should only be on visualize)
-    travelTimeHour: function() { this.updateURL(); }
+    travelMode: function() { this.updateURL(); }
   },
 
   computed: {
@@ -93,12 +93,18 @@ new Vue({
           date.addMinutes( 15 );
         }
       }
+
       return times;
     }
 
   },
 
 
+  // sort of like onReady
+  mounted: function() {
+    console.log("POOP");
+    this.parseURL();
+  },
 
 
   // event handlers accessible from the web page
@@ -139,21 +145,19 @@ new Vue({
         targetLocation: this.targetLocation.lat + "," + this.targetLocation.lng
       };
 
-      if (this.advancedSearch) {
-        data.hour  = this.travelTimeHour;
-        data.month = this.travelMonth;
-        data.day   = this.travelTimeDay;
+      data.hour  = this.travelTimeHour;
+      data.month = this.travelTimeMonth;
+      data.day   = this.travelTimeDay;
 
-        // Traffic Model (driving only)
-        if (this.travelMode === 'DRIVING') {
-          data.trafficModel= this.trafficModel;
-        }
+      // Traffic Model (driving only)
+      if (this.travelMode === 'DRIVING') {
+        data.trafficModel= this.trafficModel;
+      }
 
-        // TransitMode (transit only)
-        if (this.travelMode === 'TRANSIT') {
+      // TransitMode (transit only)
+      if (this.travelMode === 'TRANSIT') {
           data.transitTimeType= this.transitTimeType;
-          data.transitModes = this.transitModes;
-        }
+        data.transitModes = this.transitModes;
       }
 
       window.location.hash = JSON.stringify( data );
@@ -182,7 +186,7 @@ new Vue({
       this.gridRadius =     data.gridRadius || this.gridRadius;
       this.targetLocation = data.targetLocation || this.targetLocation;
       this.travelTimeHour = data.hour  || this.travelTimeHour;
-      this.travelMonth =    data.month || this.travelMonth;
+      this.travelTimeMonth= data.month || this.travelTimeMonth;
       this.travelTimeDay =  data.day   || this.travelTimeDay;
       this.trafficModel =   data.trafficModel || this.trafficModel;
       this.transitTimeType= data.transitTimeType || this.transitTimeType;
