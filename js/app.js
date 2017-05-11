@@ -14,33 +14,46 @@ new Vue({
   // update these values, rather than update the DOM directly
   data: {
     travelTimeHour: "5:00 PM",
-    travelTimeDay: Date.today().getDay(),
+    travelTimeDay:   Date.today().getDay(),
     travelTimeMonth: Date.today().toString("MMM"),
-    travelTimeYear: Date.today().toString("yyyy"),
-    travelDirection: "departFrom",  // departFrom or arriveAt,
-    travelMode: "DRIVING",    // WALKING, BICYCLING, TRANSIT, DRIVING
+    travelTimeYear:  Date.today().toString("yyyy"),
+    travelMode:   google.maps.TravelMode.DRIVING,
     trafficModel: google.maps.TrafficModel.PESSIMISTIC,
-    transitTimeType: "leaveAt", // leaveAt, arriveAt
+    travelDirection: "departFrom",  // departFrom, arriveAt,
+    transitTimeType: "leaveAt", // leaveAt, arriveBy (bus only)
+
     gridRadius: 250,            // hexagon radius in meters
     targetLocation: SEATTLE,
-    advancedSearch: false,     // true if specifyTravelTime checked
 
     trafficModels: [
       google.maps.TrafficModel.BEST_GUESS,
       google.maps.TrafficModel.OPTIMISTIC,
       google.maps.TrafficModel.PESSIMISTIC
     ],
-
-    travelModes: ["WALKING", "BICYCLING", "TRANSIT", "DRIVING"],
-    transitModes: ["BUS", "RAIL"],  // currently selected
+    travelModes: [
+      google.maps.TravelMode.WALKING,
+      google.maps.TravelMode.BICYCLING,
+      google.maps.TravelMode.TRANSIT,
+      google.maps.TravelMode.DRIVING
+    ],
+    transitModes: [
+      google.maps.TransitMode.BUS,
+      google.maps.TransitMode.RAIL
+    ],
     transitTimeTypes: ["leaveAt", "arriveBy"],
 
     foo: "deleteme"
   },
 
   watch: {
-    // update URL (seems silly to update URL on any change, should only be on visualize)
-    travelMode: function() { this.updateURL(); }
+    travelMode: function() {
+      if (this.travelMode === "DRIVING") {
+        this.transitTimeType = "leaveAt";  // can't use arriveBy for driving
+      }
+
+      this.updateURL();    // seems silly to update URL on any change,
+                           // should only be on visualize
+    }
   },
 
   computed: {
@@ -102,7 +115,6 @@ new Vue({
 
   // sort of like onReady
   mounted: function() {
-    console.log("POOP");
     this.parseURL();
   },
 
@@ -110,7 +122,10 @@ new Vue({
   // event handlers accessible from the web page
   methods: {
     // wipe map clean of hexagons
+    // should reset data to defaults too FIXME
     clear: function() {
+      window.location.hash = "";
+
       // queryIndices = [];
       // if (queryTimeout !== null) {
       //   clearTimeout(queryTimeout);
@@ -131,8 +146,9 @@ new Vue({
 
     // calculate and color hexagons by travel time
     calculate: function() {
-      this.clear();
 
+      this.clear();
+      this.updateURL();
     },
 
     // Update page URL when new options are selected
