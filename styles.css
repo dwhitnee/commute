@@ -199,16 +199,22 @@ html, body {
   opacity: 0.45;
   transition: all .15s ease-in;
 }
-#right-panel .advOpt_enabled::before, #right-panel .advOpt_disabled::before, #right-panel .advOpt_Open::before {
-                                                                               display: inline-block;
-                                                                               margin-right: 0.25rem;
-                                                                             }
-#right-panel .advOpt_enabled::before, #right-panel .advOpt_disabled::before {
-                                        content: '+';
-                                      }
-#right-panel .advOpt_Open::before{
+#right-panel .advOpt_enabled::before,
+#right-panel .advOpt_disabled::before,
+#right-panel .advOpt_Open::before {
+  display: inline-block;
+  margin-right: 0.25rem;
+}
+
+/*
+#right-panel .styleOptions_Closed::before {
+  content: '+';
+}
+#right-panel .styleOptions_Open::before {
   content: '-';
 }
+*/
+
 #right-panel #travelTimeDiv{
   padding-bottom: .5rem;
 }
