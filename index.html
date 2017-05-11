@@ -64,12 +64,10 @@
              v-if="showAdvancedSearch" id="advSearchOptions">
           <div id="travelTimeDiv">
 
-            <div id="trafficModelDiv" v-if="travelMode === 'DRIVING'"
-                 class="blocks">
+            <div v-if="travelMode === 'DRIVING'" class="blocks">
               <h4>Traffic Model ({{ trafficModel }})</h4>
-              <form id="trafficModelForm">
+              <form>
                 <ul class="radioOptions">
-
                   <li v-for="traffic in trafficModels">
                     <input type="radio"
                            v-bind:id="traffic"
@@ -77,7 +75,6 @@
                            v-bind:value="traffic">
                     <label v-bind:for="traffic">{{ traffic }}</label>
                   </li>
-
                 </ul>
               </form>
             </div>
@@ -152,7 +149,7 @@
 
       <br>
       <br>
-      <div id="styleOptionsDiv" style="display:none">
+      <div id="styleOptionsDiv" style="display:block">
         <hr>
         <br>
         <h3>Styling</h3>
@@ -166,7 +163,9 @@
         <b>Fill Opacity: </b><input id="polyFillOpacity" type="number" value=".5" onchange="refreshPolyStyle()">
         <b>Border Opacity: </b><input id="polyStrokeOpacity" type="number" value=".8" onchange="refreshPolyStyle()">
 
-        <br><input type="checkbox" id="showMarkerCheck" onchange="refreshMarker()" checked>Show Marker
+        <br><input type="checkbox" id="showMarkerCheck"
+                   v-model="showMarker" checked>
+        <label for="showMarkerCheck">Show Marker</label>
         <br><button onclick="toggleMapUI()">Toggle Map UI</button>
 
       </div>
@@ -180,17 +179,17 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
 
     <script>
-      function initialize() {
+      function initialize2() {
         console.log("well, google loaded...");
       }
     </script>
 
+    <script src="js/app.js"></script>
+    <script src="js/commute.js"></script>
+
     <!-- include google API key here and in commute.js -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ&libraries=places,geometry&&callback=initialize">
     </script>
-
-    <script src="js/app.js"></script>
-    <script src="js/commute.js"></script>
 
 
   </body>

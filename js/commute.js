@@ -363,6 +363,7 @@ function initialize() {
   targetLocation = seattle;
 
   // Get document elements
+/*
   gridSizeField = document.getElementById('gridSizeField');
   typeRadios = document.getElementById('typeForm').elements;
   advancedSearchCheck = document.getElementById('specifyTravelTime');
@@ -374,7 +375,7 @@ function initialize() {
   transitModeChecks = document.getElementById('transitModeForm').elements;
   timeTypeRadios = document.getElementById('timeTypeForm').elements;
   showMarkerCheck = document.getElementById('showMarkerCheck');
-
+*/
   // Initialize canvas
   var canvas = document.createElement('canvas');
   canvas.setAttribute('width', staticMapWidth);
@@ -389,6 +390,7 @@ function initialize() {
 
 
   // UI callbacks
+/*
   for (var i = 0; i < typeRadios.length; ++i)
     typeRadios[i].onclick = refreshURL;
 
@@ -416,8 +418,9 @@ function initialize() {
   }
   for (var i = 0; i < travelModeRadios.length; ++i)
     travelModeRadios[i].onclick = onTravelModeChanged;
+*/
 
-
+  /*
   // Read params off URL hash
   var params = window.location.hash.substring(1);
   params = params.split('&');
@@ -477,7 +480,7 @@ function initialize() {
     }
   }
   refreshDivs();
-
+*/
 
   // Create Google Maps API objects
   bounds = new google.maps.LatLngBounds;

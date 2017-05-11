@@ -1,4 +1,4 @@
-/*global Vue,google */
+/*global Vue, google */
 
 // IMPORTANT: Replace this key with your own.
 // https://developers.google.com/maps/documentation/distance-matrix/get-api-key
@@ -8,10 +8,16 @@ var API_KEY = "AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ";
 
 var SEATTLE = { lat:47.60621, lng:-122.332071 };
 
+//----------------------------------------------------------------------
+// Create the vueJS app data that controls all the rendering.
+//----------------------------------------------------------------------
 new Vue({
   el: '#commuteVisualizerApp',
 
+  //----------------------------------------
+  // The data model. When these values change the page gets re-rendered
   // update these values, rather than update the DOM directly
+  //----------------------------------------
   data: {
     travelTimeHour: "5:00 PM",
     travelTimeDay:   Date.today().getDay(),
@@ -42,9 +48,23 @@ new Vue({
     ],
     transitTimeTypes: ["leaveAt", "arriveBy"],
 
+    staticMap: {
+      width: 640,
+      height: 640,
+      context: undefined
+    },
+
+    map: undefined,  // the google Map object (what does it do?)
+
+
+    // hidden
+    showMarker: true,
     foo: "deleteme"
   },
 
+  //----------------------------------------
+  // fired when the named data elements change
+  //----------------------------------------
   watch: {
     travelMode: function() {
       if (this.travelMode === "DRIVING") {
@@ -53,9 +73,17 @@ new Vue({
 
       this.updateURL();    // seems silly to update URL on any change,
                            // should only be on visualize
+    },
+
+    // this should be done v=on:change="refreshMarker"?
+    showMarker: function() {
+      this.refreshMarker();
     }
   },
 
+  //----------------------------------------
+  // run when the web page asks for these named values
+  //----------------------------------------
   computed: {
     showAdvancedSearch: function() {
       return this.travelMode === "TRANSIT" || this.travelMode === "DRIVING";
@@ -113,14 +141,85 @@ new Vue({
   },
 
 
+  //----------------------------------------
   // sort of like onReady
+  //----------------------------------------
   mounted: function() {
     this.parseURL();
+    this.initStaticMap();
+    this.initGoogleMaps();
   },
 
 
+  //----------------------------------------
   // event handlers accessible from the web page
+  //----------------------------------------
   methods: {
+
+    refreshMarker: function() {
+      if (this.showMarker) {
+
+        if (this.targetLocationMarker)
+          this.targetLocationMarker.setMap( null );
+
+        this.targetLocationMarker = new google.maps.Marker({
+          map: this.map,
+          position: this.targetLocation,
+          clickable: false
+        });
+
+      } else {
+        if (this.targetLocationMarker)
+          this.targetLocationMarker.setMap( null );
+      }
+    },
+
+    setTargetLocation: function( targetLocation ) {
+      this.targetLocation = targetLocation;
+      this.refreshMarker();
+    },
+
+    initGoogleMaps: function() {
+      // Create Google Maps API objects
+      var bounds = new google.maps.LatLngBounds;
+      this.map = new google.maps.Map(
+        document.getElementById('map'),
+        {
+          center: this.targetLocation,
+          zoom: 11,
+          clickableIcons: false
+        });
+      this.service = new google.maps.DistanceMatrixService;
+
+      var polyInfoWindow = new google.maps.InfoWindow({content: "hello" });
+
+      this.setTargetLocation( this.targetLocation );
+      this.map.setCenter( this.targetLocation );
+
+
+      // Create search bar
+      var inputEl = document.getElementById('pac-input');
+      var searchBox = new google.maps.places.SearchBox( inputEl );
+
+      // commented out here to better set positioning controls via CSS
+      // map.controls[google.maps.ControlPosition.TOP_CENTER].push(input);
+
+      this.map.addListener('bounds_changed', () => {
+        searchBox.setBounds( this.map.getBounds() );
+      });
+
+    },
+
+
+    // Initialize canvas for static map used for masking water/highways
+    initStaticMap: function() {
+      var canvas = document.createElement('canvas');
+      canvas.setAttribute('width', this.staticMap.width );
+      canvas.setAttribute('height', this.staticMap.height );
+      this.staticMap.context = canvas.getContext('2d');
+    },
+
+
     // wipe map clean of hexagons
     // should reset data to defaults too FIXME
     clear: function() {
@@ -213,7 +312,10 @@ new Vue({
 
 });
 
-
+//----------------------------------------
+// Formatters for the web page
+// Ex: {{ travelTime | dateFormat }}
+//----------------------------------------
 Vue.filter('dateFormat', function( date ) {
   if (date) {
     return date.toString(" h:mm tt MMMM dd, yyyy");
