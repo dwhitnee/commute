@@ -149,7 +149,12 @@
 
       <br>
       <br>
-      <div id="styleOptionsDiv" style="display:block">
+      <br>
+      <br>
+      <br>
+      <!-- fixme: make this click-hideable like adv options -->
+      <input type="checkbox" v-model="showStyleOptions">Show style options
+      <div id="styleOptionsDiv" v-if="showStyleOptions">
         <hr>
         <br>
         <h3>Styling</h3>

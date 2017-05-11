@@ -48,6 +48,8 @@ new Vue({
     ],
     transitTimeTypes: ["leaveAt", "arriveBy"],
 
+    showStyleOptions: false,
+
     staticMap: {
       width: 640,
       height: 640,
@@ -55,7 +57,6 @@ new Vue({
     },
 
     map: undefined,  // the google Map object (what does it do?)
-
 
     // hidden
     showMarker: true,
