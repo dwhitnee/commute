@@ -1,6 +1,7 @@
 // IMPORTANT: Replace this key with your own.
 // Then scroll to bottom and replace key in async defer script load
-var API_KEY = "AIzaSyCNTYx3-TqDQXAsvRByPyY48zKIikFmgtc";
+//var API_KEY = "AIzaSyCNTYx3-TqDQXAsvRByPyY48zKIikFmgtc";
+var API_KEY = "AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ";
 
 // Constants
 var targetLimit = 10000;
@@ -49,7 +50,6 @@ var typeRadios;
 var travelModeRadios;
 var trafficModelRadios;
 var transitModeChecks;
-var travelThresholdFields;
 var advancedSearchCheck;
 var travelTimeDaySelect;
 var travelTimeYearSelect;
@@ -143,7 +143,7 @@ function onTravelTimeMonthChanged() {
 
 // $$$ FOR LIZ
 function refreshDivs() {
-
+/*
   var isDriving = getTravelMode() === 'DRIVING';
   var isTransit = getTravelMode() === 'TRANSIT';
 
@@ -202,11 +202,12 @@ function refreshDivs() {
   document.getElementById('trafficModelDiv').style.display = isDriving && advancedSearch ? 'block' : 'none';
   document.getElementById('transitModesDiv').style.display = isTransit ? 'block' : 'none';
   document.getElementById('travelTimeDiv').style.display = advancedSearch ? 'block' : 'none';
-
+*/
   refreshURL();
 }
 
 function refreshURL() {
+/*
   var str = '';
 
   // Search Type
@@ -218,8 +219,7 @@ function refreshURL() {
   str += "&gridSize=" + getGridRadius();
   str += "&targetLocation=" + targetLocation.lat + "," + targetLocation.lng;
 
-  var advancedSearch = specifyTavelTime.checked;
-  if (advancedSearch) {
+  if (this.advancedSearch) {
     str += "&travelTime=" + travelTimeHoursSelect.selectedIndex;
     str += "&travelMonth=" + travelTimeMonthSelect.selectedIndex;
     str += "&travelDay=" + travelTimeDaySelect.selectedIndex;
@@ -243,6 +243,7 @@ function refreshURL() {
   }
 
   window.location.hash = str;
+*/
 }
 
 function refreshPolyStyle() {
@@ -364,7 +365,7 @@ function initialize() {
   // Get document elements
   gridSizeField = document.getElementById('gridSizeField');
   typeRadios = document.getElementById('typeForm').elements;
-  advancedSearchCheck = document.getElementById('specifyTavelTime');
+  advancedSearchCheck = document.getElementById('specifyTravelTime');
   travelTimeDaySelect = document.getElementById('travelTimeDaySelect');
   travelTimeMonthSelect = document.getElementById('travelTimeMonthSelect');
   travelTimeYearSelect = document.getElementById('travelTimeYearSelect');
@@ -373,13 +374,6 @@ function initialize() {
   transitModeChecks = document.getElementById('transitModeForm').elements;
   timeTypeRadios = document.getElementById('timeTypeForm').elements;
   showMarkerCheck = document.getElementById('showMarkerCheck');
-  travelThresholdFields = [
-    document.getElementById('travelThreshold0'),
-    document.getElementById('travelThreshold1'),
-    document.getElementById('travelThreshold2'),
-    document.getElementById('travelThreshold3'),
-  ];
-
 
   // Initialize canvas
   var canvas = document.createElement('canvas');
@@ -708,10 +702,10 @@ function Calculate() {
   var mapCenter = { lat:map.getCenter().lat(), lng:map.getCenter().lng() };
   var locationStr = "\"" + mapCenter.lat + "," + mapCenter.lng + "\"";
   var imageZoom = map.getZoom() - 1;
-  var imagePath ="http://maps.googleapis.com/maps/api/staticmap?scale=2&center=" + locationStr + "&zoom=" + imageZoom + "&size=" + staticMapWidth + "x" + staticMapHeight + "&sensor=false&visual_refresh=true&style=feature:water|color:0x00FF00&style=element:labels|visibility:off&style=feature:transit|visibiity:off&style=feature:poi|visibility:off&style=feature:administrative|visibility:off&style=feature:transit|visibility:off&style=feature:road.highway|color:0x00FF00";
+  var imagePath ="http://maps.googleapis.com/maps/api/staticmap?scale=2&center=" + locationStr + "&zoom=" + imageZoom + "&size=" + staticMapWidth + "x" + staticMapHeight + "&sensor=false&visual_refresh=true&style=feature:water|color:0x00FF00&style=element:labels|visibility:off&style=feature:transit|visibility:off&style=feature:poi|visibility:off&style=feature:administrative|visibility:off&style=feature:transit|visibility:off&style=feature:road.highway|color:0x00FF00";
 
   // Example imagePath:
-  // http://maps.googleapis.com/maps/api/staticmap?scale=2&center="47.60620999999991,-122.33207357423623"&zoom=14&size=640x640&sensor=false&visual_refresh=true&style=feature:water|color:0x00FF00&style=element:labels|visibility:off&style=feature:transit|visibiity:off&style=feature:poi|visibility:off&style=feature:administrative|visibility:off&style=feature:transit|visibility:off&style=feature:road.highway|color:0x00FF00
+  // http://maps.googleapis.com/maps/api/staticmap?scale=2&center="47.60620999999991,-122.33207357423623"&zoom=14&size=640x640&sensor=false&visual_refresh=true&style=feature:water|color:0x00FF00&style=element:labels|visibility:off&style=feature:transit|visibility:off&style=feature:poi|visibility:off&style=feature:administrative|visibility:off&style=feature:transit|visibility:off&style=feature:road.highway|color:0x00FF00
 
   var mapMask = new Image();
   mapMask.crossOrigin = 'http://maps.googleapis.com/crossdomain.xml';

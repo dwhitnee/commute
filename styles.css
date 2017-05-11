@@ -5,7 +5,7 @@
   margin: 0;
   webkit-font-smoothing: subpixel-antialiased !important;
 }
-body{ 
+body{
   color: #38424E;
   font-family: 'Karla', sans-serif;
   font-size: 16px;
@@ -38,7 +38,7 @@ html, body {
   #right-panel{
     width: 49vw;
     padding: 1rem 1.5rem 3rem .5rem;
-  }   
+  }
 }
 @media (min-width: 1000px){
   #right-panel {
@@ -137,7 +137,7 @@ html, body {
 #right-panel .radioOptions label, #right-panel .radioOptions input{
   margin-left: 0;
 }
-#right-panel .radioOptions input[type="radio"], input[type="checkbox"]#specifyTavelTime {
+#right-panel .radioOptions input[type="radio"], input[type="checkbox"]#specifyTravelTime {
   position: absolute;
   top: 0;
   left: 10px;
@@ -168,7 +168,9 @@ html, body {
   color: #fff;
   transition: all .15s ease-in;
 }
-#right-panel .radioOptions input[type="radio"]:checked + label{
+
+
+#right-panel .radioOptions input[type="radio"]:checked + label {
   background: #0774C8;
   border: 1px solid #015697;
   box-shadow: none;
@@ -180,7 +182,7 @@ html, body {
 #right-panel .advOpt_enabled, #right-panel .advOpt_disabled, #right-panel .advOpt_Open{
   margin-left: 0;
   padding: 0.2rem;
-  letter-spacing: 0.03rem;                
+  letter-spacing: 0.03rem;
   text-transform: uppercase;
 }
 #right-panel .advOpt_enabled, #right-panel .advOpt_Open{
@@ -189,36 +191,29 @@ html, body {
   transition: all .15s ease-in;
 }
 #right-panel .advOpt_enabled:hover, #right-panel .advOpt_Open:hover{
-				      color: #2196F0;
-				      transition: all .15s ease-in;
-				    }
+                                      color: #2196F0;
+                                      transition: all .15s ease-in;
+                                    }
 #right-panel .advOpt_disabled{
   color: #ccc;
   opacity: 0.45;
   transition: all .15s ease-in;
 }
 #right-panel .advOpt_enabled::before, #right-panel .advOpt_disabled::before, #right-panel .advOpt_Open::before {
-									       display: inline-block;
-									       margin-right: 0.25rem;
-									     }
+                                                                               display: inline-block;
+                                                                               margin-right: 0.25rem;
+                                                                             }
 #right-panel .advOpt_enabled::before, #right-panel .advOpt_disabled::before {
-					content: '+';
-				      }
+                                        content: '+';
+                                      }
 #right-panel .advOpt_Open::before{
   content: '-';
 }
 #right-panel #travelTimeDiv{
   padding-bottom: .5rem;
 }
-#right-panel label.option_disabled{
+#right-panel input:disabled+label {
   opacity: 0.35;
-}
-#right-panel label.option_disabled:hover{
-  background: #F0F6F9;
-  border: 1px solid #D8E0E4;
-  box-shadow: inset 0 1px 0 0 #FFF;
-  color: #42525E;
-  transition: all .15s ease-in;
 }
 #right-panel #travelTimeDiv div:last-of-type{
   margin-bottom: 1rem;
@@ -232,7 +227,7 @@ html, body {
   letter-spacing: 0.03rem;
   text-transform: uppercase;
   transition: all .15s ease-in;
-} 
+}
 #right-panel .btn_pos{
   background: #00B582;
   border: 1px solid #028269;

@@ -36,63 +36,79 @@
       </div>
 
       <div class="blocks">
-        <h3>Travel Mode</h3>
+        <h3>Travel Mode ({{ travelMode }})</h3>
         <form id="travelModeForm" onchange="refreshDivs()">
           <ul class="radioOptions">
-            <li><input type="radio" name="travelModeRadio" id="WALKING" value="WALKING"><label for="WALKING">Walking</label>
+            <li><input type="radio" v-model="travelMode" id="WALKING" value="WALKING"><label for="WALKING">Walking</label>
             </li>
-            <li><input type="radio" name="travelModeRadio" id="BICYCLING" value="BICYCLING"><label for="BICYCLING">Bicycling</label></li>
-            <li><input type="radio" name="travelModeRadio" id="TRANSIT" value="TRANSIT"><label for="TRANSIT">Transit</label></li>
-            <li><input type="radio" name="travelModeRadio" id="DRIVING" value="DRIVING" checked><label for="DRIVING">Driving</label></li>
+            <li><input type="radio" v-model="travelMode" id="BICYCLING" value="BICYCLING"><label for="BICYCLING">Bicycling</label></li>
+            <li><input type="radio" v-model="travelMode" id="TRANSIT" value="TRANSIT"><label for="TRANSIT">Transit</label></li>
+            <li><input type="radio" v-model="travelMode" id="DRIVING" value="DRIVING" checked><label for="DRIVING">Driving</label></li>
           </ul>
         </form>
       </div>
 
       <div class="blocks">
-        <h3>Direction</h3>
+        <h3>Direction ({{ travelDirection }}) </h3>
         <form id="typeForm">
           <ul class="radioOptions">
-            <li><input type="radio" name="typeRadio" id="departFrom" value="departFrom" checked><label for="departFrom">Leave from</label></li>
-            <li><input type="radio" name="typeRadio" id="arriveAt" value="arriveAt" ><label for="arriveAt">Go to</label></li>
+            <li><input type="radio" v-model="travelDirection" id="departFrom" value="departFrom"><label for="departFrom">Leave from</label></li>
+            <li><input type="radio" v-model="travelDirection" id="arriveAt" value="arriveAt" ><label for="arriveAt">Go to</label></li>
           </ul>
         </form>
       </div>
 
       <div class="blocks extra_space">
-        <div class="block_advSearch_1">
-          <input type="checkbox" id="specifyTavelTime" value="specifyTravelTime" onchange="refreshDivs()"><label for="specifyTavelTime" class="advOpt_enabled" id="advOptionCheck">Advanced Search</label>
 
-        </div>
+        <div class="block_advSearch block_advSearch-visible"
+             v-if="showAdvancedSearch" id="advSearchOptions">
+          <div id="travelTimeDiv">
 
-        <div class="block_advSearch block_advSearch-hidden" id="advSearchOptions">
-          <div id="travelTimeDiv" style="display:none">
-
-            <div id="trafficModelDiv" class="blocks" style="display:none">
-              <h4>Traffic Model</h4>
-              <form id="trafficModelForm" onchange="refreshURL()">
+            <div id="trafficModelDiv" v-if="travelMode === 'DRIVING'"
+                 class="blocks">
+              <h4>Traffic Model ({{ trafficModel }})</h4>
+              <form id="trafficModelForm">
                 <ul class="radioOptions">
-                  <li><input type="radio" name="trafficModelRadio" id="bestguess" value=bestguess checked><label for="bestguess">Best Guess</label></li>
-                  <li><input type="radio" name="trafficModelRadio" id="optimistic" value=optimistic><label for="optimistic">Optimistic</label></li>
-                  <li><input type="radio" name="trafficModelRadio" id="pessimistic" value=pessimistic><label for="pessimistic">Pessimistic</label></li>
+
+                  <li v-for="traffic in trafficModels">
+                    <input type="radio"
+                           v-bind:id="traffic"
+                           v-model="trafficModel"
+                           v-bind:value="traffic">
+                    <label v-bind:for="traffic">{{ traffic }}</label>
+                  </li>
+
                 </ul>
               </form>
             </div>
 
-            <div id="transitModesDiv" class="blocks" style="display:none">
-              <h4>Preferred mode</h4>
+            <div id="transitModesDiv" v-if="travelMode == 'TRANSIT'"
+                 class="blocks">
+              <h4>Preferred mode {{ transitModes }}</h4>
               <form id="transitModeForm">
-                <div><input type="checkbox" name="transitModeCheck" id="BUS" value="BUS" checked><label for="BUS">Bus</label></div>
-                <div><input type="checkbox" name="transitModeCheck" id="RAIL" value="RAIL" checked><label for="RAIL">Rail</label></div>
+                <div>
+                  <input type="checkbox" v-model="transitModes" id="BUS" value="BUS" checked><label for="BUS">Bus</label>
+                </div>
+                <div>
+                  <input type="checkbox" v-model="transitModes" id="RAIL" value="RAIL" checked><label for="RAIL">Rail</label>
+                </div>
               </form>
             </div>
 
             <div class="blocks">
-              <h4>Time</h4>
+              <h4>Time
+                ({{ transitTimeType }} {{ travelTime | dateFormat }})
+              </h4>
 
               <form id="timeTypeForm">
                 <ul class="radioOptions">
-                  <li><input type="radio" name="timeTypeRadio" id="leaveAt" value="leaveAt" checked><label for="leaveAt">Leave At</label></li>
-                  <li><input type="radio" name="timeTypeRadio" id="arriveBy" value="arriveBy"><label for="arriveBy" id="arriveByLabel">Arrive By</label></li>
+                  <li><input type="radio" v-model="transitTimeType" id="leaveAt" value="leaveAt" checked>
+                    <label for="leaveAt">Leave At</label></li>
+                  <li><input type="radio" id="arriveBy"
+                             v-model="transitTimeType" value="arriveBy"
+                             :disabled="travelMode !== 'TRANSIT'">
+                    <label for="arriveBy" :disabled="travelMode !== 'TRANSIT'"
+                           id="arriveByLabel">Arrive By</label></li>
                 </ul>
               </form>
             </div>
@@ -127,11 +143,11 @@
 
       <div class="blocks">
         <h4>Hexagon Radius (in meters)</h4>
-        <input id="gridSizeField" name="gridSizeInput" type="number" value="250">
+        <input id="gridSizeField" v-model="gridRadius" type="number" value="250">
       </div>
       <div class="btn_right_align">
-        <button onclick="Clear()" class="btn_neg">Clear</button>
-        <button onclick="Calculate()" class="btn_pos">Visualize Commute</button>
+        <button onclick="Clear()" v-on:click="clear" class="btn_neg">Clear</button>
+        <button onclick="Calculate()" v-on:click="calculate" class="btn_pos">Visualize Commute</button>
       </div>
 
       <br>
@@ -163,13 +179,19 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.3.2/vue.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
 
+    <script>
+      function initialize() {
+        console.log("well, google loaded...");
+      }
+    </script>
+
+    <!-- include google API key here and in commute.js -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ&libraries=places,geometry&&callback=initialize">
+    </script>
+
     <script src="js/app.js"></script>
     <script src="js/commute.js"></script>
 
-    <!-- include google API key here and in commute.js -->
-    <script async defer
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCNTYx3-TqDQXAsvRByPyY48zKIikFmgtc&libraries=places,geometry&&callback=initialize">
-    </script>
 
   </body>
 </html>

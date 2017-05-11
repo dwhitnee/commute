@@ -1,22 +1,57 @@
-/*global Vue */
+/*global Vue,google */
+
+// IMPORTANT: Replace this key with your own.
+// https://developers.google.com/maps/documentation/distance-matrix/get-api-key
+// Then scroll to bottom and replace key in async defer script load
+var API_KEY = "AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ";
+//var API_KEY =   "AIzaSyCNTYx3-TqDQXAsvRByPyY48zKIikFmgtc";
+
+var SEATTLE = { lat:47.60621, lng:-122.332071 };
 
 new Vue({
   el: '#commuteVisualizerApp',
 
-
   // update these values, rather than update the DOM directly
   data: {
-    message: "Hello!",
     travelTimeHour: "5:00 PM",
     travelTimeDay: Date.today().getDay(),
     travelTimeMonth: Date.today().toString("MMM"),
-    travelTimeYear: Date.today().toString("yyyy")
+    travelTimeYear: Date.today().toString("yyyy"),
+    travelDirection: "departFrom",  // departFrom or arriveAt,
+    travelMode: "DRIVING",    // WALKING, BICYCLING, TRANSIT, DRIVING
+    trafficModel: google.maps.TrafficModel.PESSIMISTIC,
+    transitTimeType: "leaveAt", // leaveAt, arriveAt
+    gridRadius: 250,            // hexagon radius in meters
+    targetLocation: SEATTLE,
+    advancedSearch: false,     // true if specifyTravelTime checked
+
+    trafficModels: [
+      google.maps.TrafficModel.BEST_GUESS,
+      google.maps.TrafficModel.OPTIMISTIC,
+      google.maps.TrafficModel.PESSIMISTIC
+    ],
+
+    travelModes: ["WALKING", "BICYCLING", "TRANSIT", "DRIVING"],
+    transitModes: ["BUS", "RAIL"],  // currently selected
+    transitTimeTypes: ["leaveAt", "arriveBy"],
+
+    foo: "deleteme"
   },
 
   watch: {
+    // update URL (seems silly to update URL on any change, should only be on visualize)
+    travelTimeHour: function() { this.updateURL(); }
   },
 
   computed: {
+    showAdvancedSearch: function() {
+      return this.travelMode === "TRANSIT" || this.travelMode === "DRIVING";
+    },
+
+    searchRadius: function() {
+      return this.gridRadius * 10;
+    },
+
     travelTime: function() {
       return new Date("" + this.travelTimeYear +
                       " " + this.travelTimeMonth +
@@ -68,11 +103,101 @@ new Vue({
 
   // event handlers accessible from the web page
   methods: {
-    addState: function() {
-      this.states.push( this.newState );
-      this.newState = "";
-      console.log( this.states );
+    // wipe map clean of hexagons
+    clear: function() {
+      // queryIndices = [];
+      // if (queryTimeout !== null) {
+      //   clearTimeout(queryTimeout);
+      //   queryTimeout = null;
+      // }
+
+      // for (var i = 0; i < markersArray.length; i++)
+      //   markersArray[i].setMap(null);
+      // markersArray = [];
+
+      // for (var i = 0; i < polyArray.length; i++)
+      //   polyArray[i].setMap(null);
+      // polyArray = [];
+
+      // polyInfoWindow.close();
+      // polyInfoWindowSource = -1;
+    },
+
+    // calculate and color hexagons by travel time
+    calculate: function() {
+      this.clear();
+
+    },
+
+    // Update page URL when new options are selected
+    updateURL: function() {
+
+      var data = {
+        travelDirection: this.travelDirection,
+        travelMode: this.travelMode,
+        gridRadius: this.gridRadius,
+        targetLocation: this.targetLocation.lat + "," + this.targetLocation.lng
+      };
+
+      if (this.advancedSearch) {
+        data.hour  = this.travelTimeHour;
+        data.month = this.travelMonth;
+        data.day   = this.travelTimeDay;
+
+        // Traffic Model (driving only)
+        if (this.travelMode === 'DRIVING') {
+          data.trafficModel= this.trafficModel;
+        }
+
+        // TransitMode (transit only)
+        if (this.travelMode === 'TRANSIT') {
+          data.transitTimeType= this.transitTimeType;
+          data.transitModes = this.transitModes;
+        }
+      }
+
+      window.location.hash = JSON.stringify( data );
+    },
+
+
+    parseURL: function() {
+      // This might be an attack vector, but that's Google's problem
+      var hashArgs = window.location.hash.substring(1);
+      var data;
+
+      try {
+        data = JSON.parse( hashArgs );
+      }
+      catch (ex) {
+        // doh, bad URL
+        console.error( ex );
+        console.log( hashArgs );
+        return;
+      }
+
+      console.log( data );
+
+      this.travelDirection= data.travelDirection || this.travelDirection;
+      this.travelMode =     data.travelMode || this.travelMode;
+      this.gridRadius =     data.gridRadius || this.gridRadius;
+      this.targetLocation = data.targetLocation || this.targetLocation;
+      this.travelTimeHour = data.hour  || this.travelTimeHour;
+      this.travelMonth =    data.month || this.travelMonth;
+      this.travelTimeDay =  data.day   || this.travelTimeDay;
+      this.trafficModel =   data.trafficModel || this.trafficModel;
+      this.transitTimeType= data.transitTimeType || this.transitTimeType;
+      this.transitModes =   data.transitModes || this.transitModes;
     }
+
   }
 
+});
+
+
+Vue.filter('dateFormat', function( date ) {
+  if (date) {
+    return date.toString(" h:mm tt MMMM dd, yyyy");
+  } else {
+    return "";
+  }
 });
