@@ -359,7 +359,7 @@ function pointInPolygon(pointLatLng, polygonPoints) {
 
 
 // Called after Google Maps API script is asynchronously loaded
-function initialize() {
+function initizalize() {
   targetLocation = seattle;
 
   // Get document elements
@@ -377,11 +377,12 @@ function initialize() {
   showMarkerCheck = document.getElementById('showMarkerCheck');
 */
   // Initialize canvas
+/*
   var canvas = document.createElement('canvas');
   canvas.setAttribute('width', staticMapWidth);
   canvas.setAttribute('height', staticMapHeight);
   staticMapCanvas = canvas.getContext('2d');
-
+*/
   // Initialize UI date/time
   // var currentDate = new Date();
   // var tomorrow = new Date(currentDate.getTime() + 86400000);
@@ -482,6 +483,7 @@ function initialize() {
   refreshDivs();
 */
 
+  /*
   // Create Google Maps API objects
   bounds = new google.maps.LatLngBounds;
   map = new google.maps.Map(document.getElementById('map'), { center: targetLocation, zoom: 11, clickableIcons: false });
@@ -545,6 +547,7 @@ function initialize() {
     });
     map.fitBounds(bounds);
   });
+*/
 
   // Create 'draw' button
   controlDiv = document.createElement('div');

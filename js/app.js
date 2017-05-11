@@ -59,6 +59,7 @@ new Vue({
 
     // hidden
     showMarker: true,
+    markersArray: [],
     foo: "deleteme"
   },
 
@@ -145,9 +146,9 @@ new Vue({
   // sort of like onReady
   //----------------------------------------
   mounted: function() {
-    this.parseURL();
-    this.initStaticMap();
     this.initGoogleMaps();
+    // this.parseURL();
+    // this.initStaticMap();
   },
 
 
@@ -179,9 +180,10 @@ new Vue({
       this.refreshMarker();
     },
 
+    // Create Google Maps API objects
     initGoogleMaps: function() {
-      // Create Google Maps API objects
-      var bounds = new google.maps.LatLngBounds;
+
+      var bounds = new google.maps.LatLngBounds();
       this.map = new google.maps.Map(
         document.getElementById('map'),
         {
@@ -189,7 +191,7 @@ new Vue({
           zoom: 11,
           clickableIcons: false
         });
-      this.service = new google.maps.DistanceMatrixService;
+      this.service = new google.maps.DistanceMatrixService();
 
       var polyInfoWindow = new google.maps.InfoWindow({content: "hello" });
 
@@ -206,6 +208,51 @@ new Vue({
 
       this.map.addListener('bounds_changed', () => {
         searchBox.setBounds( this.map.getBounds() );
+      });
+
+      searchBox.addListener('places_changed', () => {
+        var places = searchBox.getPlaces();
+        if (places.length == 0)
+          return;
+
+        // delete old markers
+        for (var i = 0; i < this.markersArray.length; i++)
+          this.markersArray[i].setMap(null);
+        this.markersArray = [];
+
+        // For each place, get the icon, name and location.
+        bounds = new google.maps.LatLngBounds;
+        places.forEach( (place) => {
+          if (!place.geometry)
+            return;
+
+          var icon = {
+            url: place.icon,
+            size: new google.maps.Size( 71, 71 ),
+            origin: new google.maps.Point( 0, 0 ),
+            anchor: new google.maps.Point( 17, 34 ),
+            scaledSize: new google.maps.Size( 25, 25 )
+          };
+
+          this.showMarker = true;
+          this.setTargetLocation({
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng() });
+
+          // Create a marker for each place.
+          this.markersArray.push( new google.maps.Marker({
+            map: this.map,
+            icon: icon,
+            title: place.name,
+            position: place.geometry.location
+          }));
+
+          if (place.geometry.viewport)
+            bounds.union( place.geometry.viewport );
+          else
+            bounds.extend( place.geometry.location );
+        });
+        this.map.fitBounds( bounds );
       });
 
     },
