@@ -29,166 +29,179 @@
 
   <body>
    <div id="commuteVisualizerApp">
-    <div id="right-panel">
-      <div class="header">
-        <h1><span class="tinyheader">Forrestthewoods</span>Commute Visualizer</h1>
-        <a href="http://blog.forrestthewoods.com/visualizing_commute_times" class="link_text">Blog Post</a> // <a href="https://github.com/forrestthewoods/fts_commute_calculator" class="link_text">Source Code</a> // <a href="http://forrestthewoods.xyz/" class="link_text">About Author</a>
-      </div>
+     <div id="right-panel">
+       <div class="header">
+         <h1><span class="tinyheader">Forrestthewoods</span>Commute Visualizer</h1>
+         <a href="http://blog.forrestthewoods.com/visualizing_commute_times" class="link_text">Blog Post</a> // <a href="https://github.com/forrestthewoods/fts_commute_calculator" class="link_text">Source Code</a> // <a href="http://forrestthewoods.xyz/" class="link_text">About Author</a>
+       </div>
 
-      <div class="blocks">
-        <h3>Travel Mode ({{ travelMode }})</h3>
-        <form id="travelModeForm" onchange="refreshDivs()">
-          <ul class="radioOptions">
-            <li><input type="radio" v-model="travelMode" id="WALKING" value="WALKING"><label for="WALKING">Walking</label>
-            </li>
-            <li><input type="radio" v-model="travelMode" id="BICYCLING" value="BICYCLING"><label for="BICYCLING">Bicycling</label></li>
-            <li><input type="radio" v-model="travelMode" id="TRANSIT" value="TRANSIT"><label for="TRANSIT">Transit</label></li>
-            <li><input type="radio" v-model="travelMode" id="DRIVING" value="DRIVING" checked><label for="DRIVING">Driving</label></li>
-          </ul>
-        </form>
-      </div>
+       <div class="blocks">
+         <h3>Travel Mode ({{ travelMode }})</h3>
+         <form id="travelModeForm" onchange="refreshDivs()">
+           <ul class="radioOptions">
+             <li><input type="radio" v-model="travelMode" id="WALKING" value="WALKING"><label for="WALKING">Walking</label>
+             </li>
+             <li><input type="radio" v-model="travelMode" id="BICYCLING" value="BICYCLING"><label for="BICYCLING">Bicycling</label></li>
+             <li><input type="radio" v-model="travelMode" id="TRANSIT" value="TRANSIT"><label for="TRANSIT">Transit</label></li>
+             <li><input type="radio" v-model="travelMode" id="DRIVING" value="DRIVING" checked><label for="DRIVING">Driving</label></li>
+           </ul>
+         </form>
+       </div>
 
-      <div class="blocks">
-        <h3>Direction ({{ travelDirection }}) </h3>
-        <form id="typeForm">
-          <ul class="radioOptions">
-            <li><input type="radio" v-model="travelDirection" id="departFrom" value="departFrom"><label for="departFrom">Leave from</label></li>
-            <li><input type="radio" v-model="travelDirection" id="arriveAt" value="arriveAt" ><label for="arriveAt">Go to</label></li>
-          </ul>
-        </form>
-      </div>
+       <div class="blocks">
+         <h3>Direction ({{ travelDirection }}) </h3>
+         <form id="typeForm">
+           <ul class="radioOptions">
+             <li><input type="radio" v-model="travelDirection" id="departFrom" value="departFrom"><label for="departFrom">Leave from</label></li>
+             <li><input type="radio" v-model="travelDirection" id="arriveAt" value="arriveAt" ><label for="arriveAt">Go to</label></li>
+           </ul>
+         </form>
+       </div>
 
-      <div class="blocks extra_space">
+       <div class="blocks extra_space">
 
-        <div class="block_advSearch block_advSearch-visible"
-             v-if="showAdvancedSearch" id="advSearchOptions">
-          <div id="travelTimeDiv">
+         <div class="block_advSearch block_advSearch-visible"
+              v-if="showAdvancedSearch" id="advSearchOptions">
+           <div id="travelTimeDiv">
 
-            <div v-if="travelMode === 'DRIVING'" class="blocks">
-              <h4>Traffic Model ({{ trafficModel }})</h4>
-              <form>
-                <ul class="radioOptions">
-                  <li v-for="traffic in trafficModels">
-                    <input type="radio"
-                           v-bind:id="traffic"
-                           v-model="trafficModel"
-                           v-bind:value="traffic">
-                    <label v-bind:for="traffic">{{ traffic }}</label>
-                  </li>
-                </ul>
-              </form>
-            </div>
+             <div v-if="travelMode === 'DRIVING'" class="blocks">
+               <h4>Traffic Model ({{ trafficModel }})</h4>
+               <form>
+                 <ul class="radioOptions">
+                   <li v-for="traffic in trafficModels">
+                     <input type="radio"
+                            v-bind:id="traffic"
+                            v-model="trafficModel"
+                            v-bind:value="traffic">
+                     <label v-bind:for="traffic">{{ traffic }}</label>
+                   </li>
+                 </ul>
+               </form>
+             </div>
 
-            <div id="transitModesDiv" v-if="travelMode == 'TRANSIT'"
-                 class="blocks">
-              <h4>Preferred mode {{ transitModes }}</h4>
-              <form id="transitModeForm">
-                <div>
-                  <input type="checkbox" v-model="transitModes" id="BUS" value="BUS" checked><label for="BUS">Bus</label>
-                </div>
-                <div>
-                  <input type="checkbox" v-model="transitModes" id="RAIL" value="RAIL" checked><label for="RAIL">Rail</label>
-                </div>
-              </form>
-            </div>
+             <div id="transitModesDiv" v-if="travelMode == 'TRANSIT'"
+                  class="blocks">
+               <h4>Preferred mode {{ transitModes }}</h4>
+               <form id="transitModeForm">
+                 <div>
+                   <input type="checkbox" v-model="transitModes" id="BUS" value="BUS" checked><label for="BUS">Bus</label>
+                 </div>
+                 <div>
+                   <input type="checkbox" v-model="transitModes" id="RAIL" value="RAIL" checked><label for="RAIL">Rail</label>
+                 </div>
+               </form>
+             </div>
 
-            <div class="blocks">
-              <h4>Time
-                ({{ transitTimeType }} {{ travelTime | dateFormat }})
-              </h4>
+             <div class="blocks">
+               <h4>Time
+                 ({{ transitTimeType }} {{ travelTime | dateFormat }})
+               </h4>
 
-              <form id="timeTypeForm">
-                <ul class="radioOptions">
-                  <li><input type="radio" v-model="transitTimeType" id="leaveAt" value="leaveAt" checked>
-                    <label for="leaveAt">Leave At</label></li>
-                  <li><input type="radio" id="arriveBy"
-                             v-model="transitTimeType" value="arriveBy"
-                             :disabled="travelMode !== 'TRANSIT'">
-                    <label for="arriveBy" :disabled="travelMode !== 'TRANSIT'"
-                           id="arriveByLabel">Arrive By</label></li>
-                </ul>
-              </form>
-            </div>
+               <form id="timeTypeForm">
+                 <ul class="radioOptions">
+                   <li><input type="radio" v-model="transitTimeType" id="leaveAt" value="leaveAt" checked>
+                     <label for="leaveAt">Leave At</label></li>
+                   <li><input type="radio" id="arriveBy"
+                              v-model="transitTimeType" value="arriveBy"
+                              :disabled="travelMode !== 'TRANSIT'">
+                     <label for="arriveBy" :disabled="travelMode !== 'TRANSIT'"
+                            id="arriveByLabel">Arrive By</label></li>
+                 </ul>
+               </form>
+             </div>
 
-            <select id="travelTimeHoursSelect" v-model="travelTimeHour">
-              <option v-for="option in minutesOfTheDay" v-bind:value="option">
-                {{ option }}
-              </option>
-            </select>
+             <select id="travelTimeHoursSelect" v-model="travelTimeHour">
+               <option v-for="option in minutesOfTheDay" v-bind:value="option">
+                 {{ option }}
+               </option>
+             </select>
 
-            <select id="travelTimeMonthSelect" v-model="travelTimeMonth">
-              <option v-for="option in months" v-bind:value="option">
-                {{ option }}
-              </option>
-            </select>
+             <select id="travelTimeMonthSelect" v-model="travelTimeMonth">
+               <option v-for="option in months" v-bind:value="option">
+                 {{ option }}
+               </option>
+             </select>
 
-            <select id="travelTimeDaySelect" v-model="travelTimeDay">
-              <option v-for="option in daysInMonth" v-bind:value="option">
-                {{ option }}
-              </option>
-            </select>
+             <select id="travelTimeDaySelect" v-model="travelTimeDay">
+               <option v-for="option in daysInMonth" v-bind:value="option">
+                 {{ option }}
+               </option>
+             </select>
 
-            <select id="travelTimeYearSelect" v-model="travelTimeYear">
-              <option v-for="option in years" v-bind:value="option">
-                {{ option }}
-              </option>
-            </select>
+             <select id="travelTimeYearSelect" v-model="travelTimeYear">
+               <option v-for="option in years" v-bind:value="option">
+                 {{ option }}
+               </option>
+             </select>
 
-          </div>
-        </div>
-      </div>
+           </div>
+         </div>
+       </div>
 
-      <div class="blocks">
-        <h4>Hexagon Radius (in meters)</h4>
-        <input id="gridSizeField" v-model="gridRadius" type="number" value="250">
-      </div>
-      <div class="btn_right_align">
-        <button onclick="Clear()" v-on:click="clear" class="btn_neg">Clear</button>
-        <button onclick="Calculate()" v-on:click="calculate" class="btn_pos">Visualize Commute</button>
-      </div>
+       <div class="blocks">
+         <h4>Hexagon Radius (in meters)</h4>
+         <input id="gridSizeField" v-model="gridRadius" type="number" value="250">
+       </div>
+       <div class="btn_right_align">
+         <button onclick="Clear()" v-on:click="clear" class="btn_neg">Clear</button>
+         <button onclick="Calculate()" v-on:click="calculate" class="btn_pos">Visualize Commute</button>
+       </div>
 
-      <br>
-      <br>
-      <br>
-      <br>
-      <br>
-      <!-- fixme: make this click-hideable like adv options -->
-      <input type="checkbox" id="showStyleOptions" v-model="showStyleOptions"
-             class="styleOptions_Closed">
-      <label for="showStyleOptions">Show style options</label>
+       <br>
+       <br>
+       <br>
+       <br>
+       <br>
+       <!-- fixme: make this click-hideable like adv options -->
+       <input type="checkbox" id="showStyleOptions" v-model="showStyleOptions"
+              class="styleOptions_Closed">
+       <label for="showStyleOptions">Show style options</label>
 
-      <div id="styleOptionsDiv" v-if="showStyleOptions">
-        <hr>
-        <br>
-        <h3>Styling</h3>
-        <b>Colors:</b>
-        <input id="polyColorField0" type="string" value="#388C04" onchange="refreshPolyStyle()">
-        <input id="polyColorField1" type="string" value="#F0DE1B" onchange="refreshPolyStyle()">
-        <input id="polyColorField2" type="string" value="#FF7215" onchange="refreshPolyStyle()">
-        <input id="polyColorField3" type="string" value="#E00300" onchange="refreshPolyStyle()">
+       <div id="styleOptionsDiv" v-if="showStyleOptions">
+         <hr>
+         <br>
+         <h3>Styling</h3>
+         <b>Colors:</b>
+         <input id="polyColorField0" type="string" value="#388C04" onchange="refreshPolyStyle()">
+         <input id="polyColorField1" type="string" value="#F0DE1B" onchange="refreshPolyStyle()">
+         <input id="polyColorField2" type="string" value="#FF7215" onchange="refreshPolyStyle()">
+         <input id="polyColorField3" type="string" value="#E00300" onchange="refreshPolyStyle()">
 
-        <br>
-        <b>Fill Opacity: </b><input id="polyFillOpacity" type="number" value=".5" onchange="refreshPolyStyle()">
-        <b>Border Opacity: </b><input id="polyStrokeOpacity" type="number" value=".8" onchange="refreshPolyStyle()">
+         <br>
+         <b>Fill Opacity: </b><input id="polyFillOpacity" type="number" value=".5" onchange="refreshPolyStyle()">
+         <b>Border Opacity: </b><input id="polyStrokeOpacity" type="number" value=".8" onchange="refreshPolyStyle()">
 
-        <br><input type="checkbox" id="showMarkerCheck"
-                   v-model="showMarker" checked>
-        <label for="showMarkerCheck">Show Marker</label>
-        <br><button onclick="toggleMapUI()">Toggle Map UI</button>
+         <br><input type="checkbox" id="showMarkerCheck"
+                    v-model="showMarker" checked>
+         <label for="showMarkerCheck">Show Marker</label>
+         <br><button v-on:click="toggleMapControls">Toggle Map Controls</button>
 
-      </div>
-    </div>
-   </div>
+       </div>
+     </div>
 
-   <input id="pac-input" class="controls" type="text" placeholder="Search">
-    <div id="map"></div>
+     <input id="map-searchbox" class="controls" type="text" placeholder="Search"
+            v-if="showMapControls">
+
+     <div id="map"></div>
+
+     <div id="mapControlDiv" v-if="showMapControls">
+       <div class="toggleDrawing" title="Click to draw bounds" v-on:click="toggleDrawMode">
+         <div class="drawText">
+           <span v-if="inDrawMode">Clear</span>
+           <span v-else>Draw</span>
+         </div>
+       </div>
+     </div>
+
+   </div>  <!-- app -->
+
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.3.2/vue.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
 
     <script>
       function initialize2() {
-        console.log("well, google loaded...");
+         console.log("well, google loaded...");
       }
     </script>
 
@@ -197,7 +210,7 @@
     </script>
 
     <script src="js/app.js"></script>
-    <script src="js/commute.js"></script>
+<!--    <script src="js/commute.js"></script> -->
 
 
   </body>

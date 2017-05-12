@@ -357,13 +357,13 @@ function pointInPolygon(pointLatLng, polygonPoints) {
 
 
 
+/*
 
 // Called after Google Maps API script is asynchronously loaded
 function initizalize() {
   targetLocation = seattle;
 
   // Get document elements
-/*
   gridSizeField = document.getElementById('gridSizeField');
   typeRadios = document.getElementById('typeForm').elements;
   advancedSearchCheck = document.getElementById('specifyTravelTime');
@@ -548,7 +548,7 @@ function initizalize() {
     map.fitBounds(bounds);
   });
 */
-
+/*
   // Create 'draw' button
   controlDiv = document.createElement('div');
 
@@ -573,7 +573,6 @@ function initizalize() {
   drawText.innerHTML = 'Draw';
   controlUI.appendChild(drawText);
 
-
   controlUI.addEventListener('click', function() {
     if (drawText.innerHTML === 'Clear') {
       Clear();
@@ -591,8 +590,8 @@ function initizalize() {
       drawText.innerHTML = 'Clear';
     }
   });
-
-
+*/
+/*
   controlDiv.index = 1;
   map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(controlDiv);
 
@@ -645,7 +644,7 @@ function initizalize() {
     }
   });
 }
-
+*/
 function Clear() {
   queryIndices = [];
   if (queryTimeout !== null) {
