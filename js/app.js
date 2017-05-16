@@ -6,6 +6,10 @@
 var API_KEY = "AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ";
 //var API_KEY =   "AIzaSyCNTYx3-TqDQXAsvRByPyY48zKIikFmgtc";
 
+// FIXME: move all this poly drawing stuff to another module
+// map too?
+// travel calculator
+
 var SEATTLE = { lat:47.60621, lng:-122.332071 };
 
 //----------------------------------------------------------------------
@@ -29,7 +33,7 @@ new Vue({
     transitTimeType: "leaveAt", // leaveAt, arriveBy (bus only)
 
     gridRadius: 250,            // hexagon radius in meters
-    targetLocation: SEATTLE,
+    targetLocation: SEATTLE,    // LatLng of "primary" target location
 
     trafficModels: [
       google.maps.TrafficModel.BEST_GUESS,
@@ -57,11 +61,33 @@ new Vue({
     },
 
     map: undefined,  // the google Map object (what does it do?)
+    drawPolyline: undefined,
+    targetLocationMarker: undefined, // MapMarker for targetLocation
+    polyInfoWindow: undefined,       // popup when hovering over result polygon
 
     // hidden
     showMarker: true,
+    showMapControls: true,
+
+    inDrawMode: false,   // flags for bounds drawings
+    drawing: false,
+
     markersArray: [],
     foo: "deleteme"
+  },
+
+  //----------------------------------------
+  // Formatters for the web page
+  // Ex: {{ travelTime | date }}
+  //----------------------------------------
+  filters: {
+    date: function( date ) {
+      if (date) {
+        return date.toString(" h:mm tt MMMM dd, yyyy");
+      } else {
+        return "";
+      }
+    }
   },
 
   //----------------------------------------
@@ -148,6 +174,8 @@ new Vue({
   //----------------------------------------
   mounted: function() {
     this.initGoogleMaps();
+    this.initDrawing();
+
     // this.parseURL();
     // this.initStaticMap();
   },
@@ -158,21 +186,27 @@ new Vue({
   //----------------------------------------
   methods: {
 
+    // hide Google Map buttons and such. Cosmetic only
+    toggleMapControls: function() {
+      this.showMapControls = !this.showMapControls;
+
+      this.map.setOptions({ disableDefaultUI: !this.showMapControls });
+
+      this.showMarker = this.showMapControls;
+      this.refreshMarker();
+    },
+
     refreshMarker: function() {
+      if (this.targetLocationMarker) {
+        this.targetLocationMarker.setMap( null );
+      }
+
       if (this.showMarker) {
-
-        if (this.targetLocationMarker)
-          this.targetLocationMarker.setMap( null );
-
         this.targetLocationMarker = new google.maps.Marker({
           map: this.map,
           position: this.targetLocation,
           clickable: false
         });
-
-      } else {
-        if (this.targetLocationMarker)
-          this.targetLocationMarker.setMap( null );
       }
     },
 
@@ -194,14 +228,14 @@ new Vue({
         });
       this.service = new google.maps.DistanceMatrixService();
 
-      var polyInfoWindow = new google.maps.InfoWindow({content: "hello" });
+      this.polyInfoWindow = new google.maps.InfoWindow({content: "hello" });
 
       this.setTargetLocation( this.targetLocation );
       this.map.setCenter( this.targetLocation );
 
 
       // Create search bar
-      var inputEl = document.getElementById('pac-input');
+      var inputEl = document.getElementById('map-searchbox');
       var searchBox = new google.maps.places.SearchBox( inputEl );
 
       // commented out here to better set positioning controls via CSS
@@ -255,7 +289,89 @@ new Vue({
         });
         this.map.fitBounds( bounds );
       });
+    },
 
+
+    // set up whatever drawing means
+    initDrawing: function() {
+      var controlDiv = document.getElementById('mapControlDiv');
+
+      controlDiv.index = 1;
+      this.map.controls[ google.maps.ControlPosition.BOTTOM_RIGHT ].push(
+        controlDiv );
+
+      this.drawPolyline = new google.maps.Polyline({
+        map: this.map,
+        clickable: false,
+        strokeColor: "#FF0000",
+        strokeOpacity: .5,
+        strokeWeight: 1 });
+
+      // Event listeners on map to support drawing
+      // use arrow functions so "this" is bound to app object, not window
+      google.maps.event.addListener( this.map, 'mousedown', (e) => {
+        if (this.drawing) {
+          this.drawPolyline.getPath().push( e.latLng );
+        }
+      });
+
+      google.maps.event.addListener( this.map, 'mousemove', (e) => {
+        if (this.drawing && this.drawPolyline.getPath().getLength() > 0) {
+          var latLng = e.latLng;
+          var path = this.drawPolyline.getPath();
+          var last = path.getAt(path.getLength() - 1);
+          var dist = google.maps.geometry.spherical.computeDistanceBetween( last, latLng );
+         if (dist > 100)
+            path.push( latLng );
+        }
+      });
+
+      var drawEnding = false; // timer BS due to 'click' event BS
+      var endDraw = (e) => {
+        if (this.drawing) {
+          var path = this.drawPolyline.getPath();
+          path.push( e.latLng );
+          path.push( path.getAt(0) );
+          this.map.setOptions({ draggable:true, draggableCursor: null });
+          this.drawing = false;
+          drawEnding = true;
+          setTimeout(function() { drawEnding = false; }, 100);
+        }
+      };
+
+      google.maps.event.addListener( this.map, 'mouseup', endDraw);
+      google.maps.event.addListener( this.map, 'mouseout', endDraw);
+
+      // Disable page scrolling on mobile when drawing
+      document.body.addEventListener('touchmove', (e) => {
+        if (this.drawing)
+          e.preventDefault();
+      });
+
+      // Target Location handling
+      google.maps.event.addListener( this.map, 'click', (e) => {
+        if (!this.drawing && !drawEnding) {
+          this.showMarker = true;
+          this.setTargetLocation( { lat:e.latLng.lat(), lng: e.latLng.lng() });
+        }
+      });
+    },
+
+    toggleDrawMode: function() {
+
+      this.clear();
+      this.drawPolyline.getPath().clear();
+      this.inDrawMode = !this.inDrawMode;
+
+      if (this.inDrawMode) {
+        this.drawing = true;
+        this.map.setOptions({ draggable:false, draggableCursor: 'crosshair' });
+      } else {
+        this.map.setOptions({ draggable:true, draggableCursor: null });
+        // ??? document.body.classList.remove('blockScroll');
+      }
+
+      console.log("Draw mode " + this.inDrawMode );
     },
 
 
@@ -273,6 +389,7 @@ new Vue({
     clear: function() {
       window.location.hash = "";
 
+      // FIXME
       // queryIndices = [];
       // if (queryTimeout !== null) {
       //   clearTimeout(queryTimeout);
@@ -287,8 +404,8 @@ new Vue({
       //   polyArray[i].setMap(null);
       // polyArray = [];
 
-      // polyInfoWindow.close();
-      // polyInfoWindowSource = -1;
+      this.polyInfoWindow.close();
+      this.polyInfoWindowSource = -1;
     },
 
     // calculate and color hexagons by travel time
@@ -358,16 +475,4 @@ new Vue({
 
   }
 
-});
-
-//----------------------------------------
-// Formatters for the web page
-// Ex: {{ travelTime | dateFormat }}
-//----------------------------------------
-Vue.filter('dateFormat', function( date ) {
-  if (date) {
-    return date.toString(" h:mm tt MMMM dd, yyyy");
-  } else {
-    return "";
-  }
 });

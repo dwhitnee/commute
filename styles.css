@@ -64,18 +64,19 @@ html, body {
 #right-panel .extra_space{
   margin-bottom: 3rem;
 }
-#right-panel .block_advSearch_1{
+#right-panel .block_advSearch_1 {
   margin-bottom: 0.5rem;
 }
-#right-panel .block_advSearch-visible, #right-panel .block_advSearch-hidden{
+#right-panel .block_advSearch-visible,
+#right-panel .block_advSearch-hidden {
   padding: 1rem;
   border: 1px solid #E6EBEC;
   background: #F9FBFC;
 }
-#right-panel .block_advSearch-visible{
+#right-panel .block_advSearch-visible {
   display: block;
 }
-#right-panel .block_advSearch-hidden{
+#right-panel .block_advSearch-hidden {
   display: none;
 }
 #right-panel h1{
@@ -87,7 +88,7 @@ html, body {
   color: #2F435E;
 }
 
-#right-panel .tinyheader{
+#right-panel .tinyheader {
   text-transform: uppercase;
   font-size: 1rem;
   font-weight: 400;
@@ -101,27 +102,29 @@ html, body {
   letter-spacing: .05em;
 }
 
-#right-panel h3{
+#right-panel h3 {
   text-transform: uppercase;
   font-size: 1rem;
   letter-spacing: 0.03rem;
 }
-#right-panel h4{
+#right-panel h4 {
   text-transform: uppercase;
   font-size: 0.75rem;
   letter-spacing: 0.03rem;
 }
-#right-panel label{
+#right-panel label {
   margin-left: 0.5rem;
 }
-#right-panel input#gridSizeField, #right-panel input#searchRadiusField{
+#right-panel input#gridSizeField,
+#right-panel input#searchRadiusField {
   width: 7.5rem;
 }
-#right-panel select, #right-panel input {
+#right-panel select,
+#right-panel input {
   font-size: 15px;
   padding: 0.4rem;
 }
-#right-panel ul li{
+#right-panel ul li {
   list-style: none;
   display: inline-block;
   margin: 0;
@@ -130,21 +133,23 @@ html, body {
   margin: 0;
   padding: 0;
 }
-#right-panel .radioOptions li{
+#right-panel .radioOptions li {
   margin: 0.5rem .5rem 0.5rem 0;
   position: relative;
 }
-#right-panel .radioOptions label, #right-panel .radioOptions input{
+#right-panel .radioOptions label,
+#right-panel .radioOptions input {
   margin-left: 0;
 }
-#right-panel .radioOptions input[type="radio"], input[type="checkbox"]#specifyTravelTime {
+#right-panel .radioOptions input[type="radio"],
+input[type="checkbox"]#specifyTravelTime {
   position: absolute;
   top: 0;
   left: 10px;
   opacity: 0.001;
   z-index: 100;
 }
-#right-panel .radioOptions label{
+#right-panel .radioOptions label {
   z-index: 90;
   padding: .3rem .5rem;
   background: #F0F6F9;
@@ -157,7 +162,7 @@ html, body {
   text-transform: uppercase;
   transition: all .15s ease-in;
 }
-#right-panel .radioOptions label:focus{
+#right-panel .radioOptions label:focus {
   outline: 2px auto #E59700;
   outline: 5px auto -webkit-focus-ring-color;
 }
@@ -176,25 +181,30 @@ html, body {
   box-shadow: none;
   color: #fff;
 }
-#right-panel #transitModesDiv div:first-child{
+#right-panel #transitModesDiv div:first-child {
   margin-bottom: .3rem;
 }
-#right-panel .advOpt_enabled, #right-panel .advOpt_disabled, #right-panel .advOpt_Open{
+#right-panel .advOpt_enabled,
+#right-panel .advOpt_disabled,
+#right-panel .advOpt_Open {
   margin-left: 0;
   padding: 0.2rem;
   letter-spacing: 0.03rem;
   text-transform: uppercase;
 }
-#right-panel .advOpt_enabled, #right-panel .advOpt_Open{
+#right-panel .advOpt_enabled,
+#right-panel .advOpt_Open {
   color: #0774C8;
   text-decoration: underline;
   transition: all .15s ease-in;
 }
-#right-panel .advOpt_enabled:hover, #right-panel .advOpt_Open:hover{
-                                      color: #2196F0;
-                                      transition: all .15s ease-in;
-                                    }
-#right-panel .advOpt_disabled{
+#right-panel .advOpt_enabled:hover,
+#right-panel .advOpt_Open:hover {
+  color: #2196F0;
+  transition: all .15s ease-in;
+}
+
+#right-panel .advOpt_disabled {
   color: #ccc;
   opacity: 0.45;
   transition: all .15s ease-in;
@@ -215,26 +225,27 @@ html, body {
 }
 */
 
-#right-panel #travelTimeDiv{
+#right-panel #travelTimeDiv {
   padding-bottom: .5rem;
 }
 #right-panel input:disabled+label {
   opacity: 0.35;
 }
-#right-panel #travelTimeDiv div:last-of-type{
+#right-panel #travelTimeDiv div:last-of-type {
   margin-bottom: 1rem;
 }
 #right-panel i {
   font-size: 12px;
 }
-#right-panel .btn_pos, #right-panel .btn_neg{
+#right-panel .btn_pos,
+#right-panel .btn_neg {
   padding: 0.5rem .65rem;
   font-size: 0.8rem;
   letter-spacing: 0.03rem;
   text-transform: uppercase;
   transition: all .15s ease-in;
 }
-#right-panel .btn_pos{
+#right-panel .btn_pos {
   background: #00B582;
   border: 1px solid #028269;
   border-radius: 0.15rem;
@@ -244,18 +255,18 @@ html, body {
   letter-spacing: 0.03rem;
   text-transform: uppercase;
 }
-#right-panel .btn_pos:hover{
+#right-panel .btn_pos:hover {
   background: #008C84;
   border: 1px solid #006061;
   box-shadow: inset 0 1px 0 0 #50AAA5;
   transition: all .15s ease-in;
 }
-#right-panel .btn_neg{
+#right-panel .btn_neg {
   border: none;
   background: none;
   color: #E53935;
 }
-#right-panel .btn_neg:hover{
+#right-panel .btn_neg:hover {
   color: #B71C1C;
   text-decoration: underline;
   transition: all .15s ease-in;
@@ -265,7 +276,7 @@ html, body {
 }
 
 /* SEARCH BAR */
-#pac-input {
+#map-searchbox {
   position: absolute;
   top: 1.5vh;
   left: 20vw;
@@ -279,6 +290,28 @@ html, body {
   font-size: 13px;
   text-overflow: ellipsis;
 }
-#pac-input:focus {
+#map-searchbox:focus {
   border-color: #4d90fe;
+}
+
+#mapControlDiv .toggleDrawing {
+  background-color: #00B582;
+  border: 1px solid #028269;
+  border-radius: 0.15rem;
+  box-shadow: inset 0 1px 0 0 #58C8A8;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  padding: 0 rem 1.3rem;
+  text-align: center;
+}
+#mapControlDiv .drawText {
+  color: #fff;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 2rem;
+}
+
+#showStyleOptions {
+  padding-top: 5em;
 }
