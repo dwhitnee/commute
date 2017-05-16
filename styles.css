@@ -216,15 +216,6 @@ input[type="checkbox"]#specifyTravelTime {
   margin-right: 0.25rem;
 }
 
-/*
-#right-panel .styleOptions_Closed::before {
-  content: '+';
-}
-#right-panel .styleOptions_Open::before {
-  content: '-';
-}
-*/
-
 #right-panel #travelTimeDiv {
   padding-bottom: .5rem;
 }
@@ -312,6 +303,22 @@ input[type="checkbox"]#specifyTravelTime {
   line-height: 2rem;
 }
 
-#showStyleOptions {
+.showStyleOptionsToggle {
   padding-top: 5em;
+}
+
+label[for="showStyleOptions"]:hover {
+  color: #2196F0;
+  background-color: lightGray;
+}
+
+.showStyleOptionsToggle input[type=checkbox] {
+  display: none;
+}
+
+.showStyleOptionsToggle::before {
+  content: '+';
+}
+.styleOptionsOpen::before {
+  content: '-';
 }

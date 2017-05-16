@@ -188,6 +188,8 @@ new Vue({
 
     // hide Google Map buttons and such. Cosmetic only
     toggleMapControls: function() {
+      // this breaks on recover, do we care?
+
       this.showMapControls = !this.showMapControls;
 
       this.map.setOptions({ disableDefaultUI: !this.showMapControls });

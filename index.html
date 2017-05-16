@@ -149,9 +149,11 @@
 
 
       <!-- fixme: make this click-hideable like adv options -->
-      <input type="checkbox" id="showStyleOptions" v-model="showStyleOptions"
-             class="styleOptions_Closed">
-      <label for="showStyleOptions">Show style options</label>
+      <div class="showStyleOptionsToggle" v-bind:class="{ styleOptionsOpen: showStyleOptions }">
+        <input type="checkbox" id="showStyleOptions" class="styleOptions_Closed"
+               v-model="showStyleOptions">
+        <label for="showStyleOptions">Show style options</label>
+      </div>
 
       <div id="styleOptionsDiv" v-if="showStyleOptions">
         <hr>
