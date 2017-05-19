@@ -159,20 +159,22 @@
         <hr>
         <br>
         <h3>Styling</h3>
-        <b>Colors:</b>
-        <input id="polyColorField0" type="string" value="#388C04" onchange="refreshPolyStyle()">
-        <input id="polyColorField1" type="string" value="#F0DE1B" onchange="refreshPolyStyle()">
-        <input id="polyColorField2" type="string" value="#FF7215" onchange="refreshPolyStyle()">
-        <input id="polyColorField3" type="string" value="#E00300" onchange="refreshPolyStyle()">
-
-        <br>
-        <b>Fill Opacity: </b><input id="polyFillOpacity" type="number" value=".5" onchange="refreshPolyStyle()">
-        <b>Border Opacity: </b><input id="polyStrokeOpacity" type="number" value=".8" onchange="refreshPolyStyle()">
-
-        <br><input type="checkbox" id="showMarkerCheck"
-                   v-model="showMarker" checked>
-        <label for="showMarkerCheck">Show Marker</label>
-        <br><button v-on:click="toggleMapControls">Toggle Map Controls</button>
+        <div>
+          <b>Colors:</b>
+          <input type="string" v-model="polyColors[0]" v-on:change="refreshPolyStyle">
+          <input type="string" v-model="polyColors[1]" v-on:change="refreshPolyStyle">
+          <input type="string" v-model="polyColors[2]" v-on:change="refreshPolyStyle">
+          <input type="string" v-model="polyColors[3]" v-on:change="refreshPolyStyle">
+        </div>
+        <div>
+          <b>Fill Opacity: </b><input v-model="polyFillOpacity" size="3" type="number" v-on:change="refreshPolyStyle">
+          <b>Border Opacity: </b><input  v-mode="polyStrokeOpacity" size="3" type="number" v-on:change="refreshPolyStyle">
+        </div>
+        <div><input type="checkbox" id="showMarkerCheck"
+                    v-model="showMarker" checked>
+          <label for="showMarkerCheck">Show Marker</label>
+        </div>
+        <button v-on:click="toggleMapControls">Toggle Map Controls</button>
 
       </div>
     </div>
@@ -181,7 +183,7 @@
            v-if="showMapControls">
 
     <div id="mapControlDiv" v-if="showMapControls">
-      <div class="toggleDrawing" title="Click to draw bounds" v-on:click="toggleDrawMode">
+      <button class="btn_pos" title="Click to draw bounds" v-on:click="toggleDrawMode">
         <div class="drawText">
           <span v-if="inDrawMode">Clear</span>
           <span v-else>Draw</span>

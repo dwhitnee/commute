@@ -228,15 +228,15 @@ input[type="checkbox"]#specifyTravelTime {
 #right-panel i {
   font-size: 12px;
 }
-#right-panel .btn_pos,
-#right-panel .btn_neg {
+.btn_pos,
+.btn_neg {
   padding: 0.5rem .65rem;
   font-size: 0.8rem;
   letter-spacing: 0.03rem;
   text-transform: uppercase;
   transition: all .15s ease-in;
 }
-#right-panel .btn_pos {
+.btn_pos {
   background: #00B582;
   border: 1px solid #028269;
   border-radius: 0.15rem;
@@ -246,18 +246,18 @@ input[type="checkbox"]#specifyTravelTime {
   letter-spacing: 0.03rem;
   text-transform: uppercase;
 }
-#right-panel .btn_pos:hover {
+.btn_pos:hover {
   background: #008C84;
   border: 1px solid #006061;
   box-shadow: inset 0 1px 0 0 #50AAA5;
   transition: all .15s ease-in;
 }
-#right-panel .btn_neg {
+.btn_neg {
   border: none;
   background: none;
   color: #E53935;
 }
-#right-panel .btn_neg:hover {
+.btn_neg:hover {
   color: #B71C1C;
   text-decoration: underline;
   transition: all .15s ease-in;
@@ -295,12 +295,9 @@ input[type="checkbox"]#specifyTravelTime {
   padding: 0 rem 1.3rem;
   text-align: center;
 }
-#mapControlDiv .drawText {
-  color: #fff;
-  font-size: 13px;
+#mapControlDiv button {
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  line-height: 2rem;
+  margin-bottom: 2em;
 }
 
 .showStyleOptionsToggle {
@@ -321,4 +318,8 @@ label[for="showStyleOptions"]:hover {
 }
 .styleOptionsOpen::before {
   content: '-';
+}
+
+#styleOptionsDiv input {
+  width: 6em;
 }

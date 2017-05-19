@@ -1,3 +1,5 @@
+/*global google */
+
 // IMPORTANT: Replace this key with your own.
 // Then scroll to bottom and replace key in async defer script load
 //var API_KEY = "AIzaSyCNTYx3-TqDQXAsvRByPyY48zKIikFmgtc";
@@ -68,7 +70,7 @@ var pixelsPerLonDegree = MERCATOR_RANGE / 360;
 var pixelsPerLonRadian = MERCATOR_RANGE / (2 * Math.PI);
 var destinationLimit = 25;
 
-
+/*
 // Form accesors
 function getType() {
   for (var i = 0; i < typeRadios.length; i++)
@@ -114,20 +116,19 @@ function getGridRadius() {
 function getSearchRadius() {
   return getGridRadius() * 10;
 }
-
+*/
 function getTravelTimeThresholdIndex(travelTimeSeconds) {
   for (var i = 0; i < travelTimeThresholds.length; ++i)
     if (travelTimeSeconds < travelTimeThresholds[i] * 60)
       return i;
 }
-
+/*
 function setTargetLocation(newTarget) {
   targetLocation = newTarget;
 
   refreshMarker();
   refreshURL();
 }
-
 
 // UI callbacks
 function onTravelTimeMonthChanged() {
@@ -143,7 +144,7 @@ function onTravelTimeMonthChanged() {
 
 // $$$ FOR LIZ
 function refreshDivs() {
-/*
+
   var isDriving = getTravelMode() === 'DRIVING';
   var isTransit = getTravelMode() === 'TRANSIT';
 
@@ -243,7 +244,6 @@ function refreshURL() {
   }
 
   window.location.hash = str;
-*/
 }
 
 function refreshPolyStyle() {
@@ -267,6 +267,7 @@ function refreshPolyStyle() {
     } );
   }
 }
+
 
 function refreshMarker() {
 
@@ -295,8 +296,9 @@ function toggleMapUI() {
   showMarkerCheck.checked = !disabled;
   refreshMarker();
 }
+*/
 
-
+  /*
 // Math Utilities
 function toRadians(degrees) { return degrees / 180 * Math.PI; };
 function toDegrees(radians) { return radians / Math.PI * 180; };
@@ -355,6 +357,7 @@ function pointInPolygon(pointLatLng, polygonPoints) {
   return count % 2 == 1;
 }
 
+*/
 
 
 
@@ -547,7 +550,6 @@ function initizalize() {
     });
     map.fitBounds(bounds);
   });
-*/
 
   // Create 'draw' button
   controlDiv = document.createElement('div');
@@ -665,6 +667,10 @@ function Clear() {
   polyInfoWindowSource = -1;
 }
 
+*/
+
+
+
 
 // Called when 'Calculate' button is clicked by user
 function Calculate() {
@@ -674,6 +680,7 @@ function Calculate() {
   // Clear old data
   Clear();
 
+  /*
   gridRadius = getGridRadius();
   gridInradius = Math.sqrt(3)/2 * gridRadius;
   searchRadius = getSearchRadius();
@@ -701,7 +708,7 @@ function Calculate() {
   }
   map.fitBounds(searchBounds);
 
-
+  */
 
 
   // Build a static map URL for detecting water/highways
@@ -1022,6 +1029,7 @@ function Calculate() {
   }
 }
 
+/*
 // StaticMap mask utilities
 function latLngToPoint(lat, lng) {
   var x = HALF_MERCATOR_RANGE + lng * pixelsPerLonDegree;
@@ -1063,7 +1071,6 @@ function staticMapPixel(lat, lng, corners, mapWidth, mapHeight) {
 
   return { x:Math.floor(x), y:Math.floor(y) };
 }
-
 function isMasked(mapMask, lat, lng, corners, mapWidth, mapHeight) {
 
   var pixel = staticMapPixel(lat, lng, corners, mapWidth, mapHeight);
@@ -1075,3 +1082,4 @@ function isMasked(mapMask, lat, lng, corners, mapWidth, mapHeight) {
   var is_green = pixel_data[0] == 0 && pixel_data[1] >= 254 && pixel_data[2] == 0;
   return is_green;
 }
+*/

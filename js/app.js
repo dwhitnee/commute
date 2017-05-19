@@ -1,11 +1,5 @@
 /*global Vue, google */
 
-// IMPORTANT: Replace this key with your own.
-// https://developers.google.com/maps/documentation/distance-matrix/get-api-key
-// Then scroll to bottom and replace key in async defer script load
-var API_KEY = "AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ";
-//var API_KEY =   "AIzaSyCNTYx3-TqDQXAsvRByPyY48zKIikFmgtc";
-
 // FIXME: move all this poly drawing stuff to another module
 // map too?
 // travel calculator
@@ -65,6 +59,13 @@ new Vue({
     targetLocationMarker: undefined, // MapMarker for targetLocation
     polyInfoWindow: undefined,       // popup when hovering over result polygon
 
+    polyFillOpacity: 0.5,
+    polyStrokeOpacity: 0.8,
+    polyColors: ['#388C04', '#F0DE1B', '#FF7215', '#E00300',
+                 /*'#CB55E3', '#3B74ED',*/ '#D3D3D3'],
+
+    polyArray: [],             // search result polygons
+
     // hidden
     showMarker: true,
     showMapControls: true,
@@ -121,6 +122,7 @@ new Vue({
       return this.gridRadius * 10;
     },
 
+    // time of departure or arival (not duration)
     travelTime: function() {
       return new Date("" + this.travelTimeYear +
                       " " + this.travelTimeMonth +
@@ -187,8 +189,8 @@ new Vue({
   methods: {
 
     // hide Google Map buttons and such. Cosmetic only
+    // this only works once, then mapControlDiv gets lost somehow...
     toggleMapControls: function() {
-      // this breaks on recover, do we care?
 
       this.showMapControls = !this.showMapControls;
 
@@ -196,6 +198,7 @@ new Vue({
 
       this.showMarker = this.showMapControls;
       this.refreshMarker();
+
     },
 
     refreshMarker: function() {
@@ -385,6 +388,21 @@ new Vue({
       this.staticMap.context = canvas.getContext('2d');
     },
 
+    // update style of hexagons based on UI
+    refreshPolyStyle: function() {
+      for (var i = 0; i < this.polyArray.length; ++i) {
+        var p = this.polyArray[i];
+        var color = this.polyColors[ Math.abs( p.zIndex )];
+
+        p.setOptions( {
+          fillColor: color,
+          fillOpacity: this.polyFillOpacity,
+          strokeColor: color,
+          strokeOpacity: this.polyStrokeOpacity
+        } );
+      }
+      console.log("Update");
+    },
 
     // wipe map clean of hexagons
     // should reset data to defaults too FIXME
