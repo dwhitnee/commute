@@ -143,8 +143,8 @@
         <input id="gridSizeField" v-model="gridRadius" type="number" value="250">
       </div>
       <div class="btn_right_align">
-        <button onclick="Clear()" v-on:click="clear" class="btn_neg">Clear</button>
-        <button onclick="Calculate()" v-on:click="calculate" class="btn_pos">Visualize Commute</button>
+        <button v-on:click="clear" class="btn_neg">Clear</button>
+        <button v-on:click="calculate" class="btn_pos">Visualize Commute</button>
       </div>
 
 
@@ -198,18 +198,20 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.3.2/vue.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
 
-  <script>
-    function initialize2() {
-        console.log("well, google loaded...");
-    }
+ <script>
+  var API_KEY = "AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ";
+  function initialize2() {
+    console.log("well, google loaded...");
+  }
   </script>
 
   <!-- include google API key here and in commute.js -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ&libraries=places,geometry&&callback=initialize2">
   </script>
 
+  <script src="js/accessMap.js"></script>
+  <script src="js/calculator.js"></script>
   <script src="js/app.js"></script>
-  <!--     <script src="js/commute.js"></script> -->
 
 </body>
 </html>

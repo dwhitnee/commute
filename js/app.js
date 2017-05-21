@@ -1,4 +1,4 @@
-/*global Vue, google */
+/*global Vue, google, Calculator */
 
 // FIXME: move all this poly drawing stuff to another module
 // map too?
@@ -48,23 +48,18 @@ new Vue({
 
     showStyleOptions: false,
 
-    staticMap: {
-      width: 640,
-      height: 640,
-      context: undefined
-    },
-
     map: undefined,  // the google Map object (what does it do?)
     drawPolyline: undefined,
     targetLocationMarker: undefined, // MapMarker for targetLocation
-    polyInfoWindow: undefined,       // popup when hovering over result polygon
 
     polyFillOpacity: 0.5,
     polyStrokeOpacity: 0.8,
     polyColors: ['#388C04', '#F0DE1B', '#FF7215', '#E00300',
                  /*'#CB55E3', '#3B74ED',*/ '#D3D3D3'],
 
-    polyArray: [],             // search result polygons
+    polyArray: [],                // search result polygons
+    polyInfoWindow: undefined,    // popup when hovering over result polygon
+    polyInfoWindowSource: -1,     // popup source polygon id (why?)
 
     // hidden
     showMarker: true,
@@ -179,7 +174,6 @@ new Vue({
     this.initDrawing();
 
     // this.parseURL();
-    // this.initStaticMap();
   },
 
 
@@ -187,6 +181,70 @@ new Vue({
   // event handlers accessible from the web page
   //----------------------------------------
   methods: {
+
+    /**
+     * create map polygon, add tooltip with travel time.
+     */
+    addHexagonToMap( id, center, vertices, colorIndex, travelTime ) {
+      var color = this.polyColors[colorIndex];
+
+      var poly = new google.maps.Polygon({
+        paths: vertices,
+        strokeColor: color,
+        strokeOpacity: this.polyStrokeOpacity,
+        strokeWeight: 1,
+        fillColor: color,
+        fillOpacity: colorIndex < this.polyColors.length - 1 ? this.polyFillOpacity : .35,
+        zIndex: -colorIndex,
+        // user data
+        id: id,
+        travelTime: travelTime,
+        center: center
+      });
+
+      this.polyArray.push( poly );
+
+      // new hexagon entered, move tooltip to this hexagon and display travel time.
+      var handleMouseOver = function() {
+        var idx = id;
+        var centerCopy = center;
+        var travelTimeCopy = travelTime;
+
+        // this should get it's info from the event, not the closure.  Less messy.
+        return function(e) {
+
+          var poly = this;  // is this really the target here?  FIXME
+
+          if (this.polyInfoWindow.getMap() == null) {
+            if (this.polyInfoWindowSource == -1)
+              this.polyInfoWindow.open( this.map );
+
+            var minutes = (Math.round((travelTimeCopy/60) * 100) / 100).toFixed(2);
+
+            this.polyInfoWindowSource = idx;
+            this.polyInfoWindow.setContent(`${minutes} minutes`);
+            this.polyInfoWindow.setPosition( centerCopy );
+          }
+        };
+      };
+
+      // hide tooltip if displayed
+      var handleMouseOut = function(e) {
+        var idx = id;
+
+        return function(e) {
+          if (this.polyInfoWindowSource == idx) {
+            this.polyInfoWindow.close();
+            this.polyInfoWindowSource = -1;
+          }
+        };
+      };
+
+      google.maps.event.addListener( poly, 'mouseover', handleMouseOver() );
+      google.maps.event.addListener( poly, 'mouseout', handleMouseOut() );
+      poly.setMap( this.map );
+
+    },
 
     // hide Google Map buttons and such. Cosmetic only
     // this only works once, then mapControlDiv gets lost somehow...
@@ -231,9 +289,9 @@ new Vue({
           zoom: 11,
           clickableIcons: false
         });
-      this.service = new google.maps.DistanceMatrixService();
 
-      this.polyInfoWindow = new google.maps.InfoWindow({content: "hello" });
+      // the one tooltip to hold travel times for each polygon
+      this.polyInfoWindow = new google.maps.InfoWindow({ content: "hello" });
 
       this.setTargetLocation( this.targetLocation );
       this.map.setCenter( this.targetLocation );
@@ -297,7 +355,7 @@ new Vue({
     },
 
 
-    // set up whatever drawing means
+    // set up whatever drawing means, random polygon search area?
     initDrawing: function() {
       var controlDiv = document.getElementById('mapControlDiv');
 
@@ -380,14 +438,6 @@ new Vue({
     },
 
 
-    // Initialize canvas for static map used for masking water/highways
-    initStaticMap: function() {
-      var canvas = document.createElement('canvas');
-      canvas.setAttribute('width', this.staticMap.width );
-      canvas.setAttribute('height', this.staticMap.height );
-      this.staticMap.context = canvas.getContext('2d');
-    },
-
     // update style of hexagons based on UI
     refreshPolyStyle: function() {
       for (var i = 0; i < this.polyArray.length; ++i) {
@@ -433,6 +483,10 @@ new Vue({
 
       this.clear();
       this.updateURL();
+
+      // probably should pass in more specific data (map, target, gridRadius, searchRadius, polyLine
+      var calculator = new Calculator( this );
+      calculator.calculate();
     },
 
     // Update page URL when new options are selected

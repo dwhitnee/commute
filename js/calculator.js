@@ -1,200 +1,281 @@
-/*global google, Image */
+/*global google, AccessMap */
 
 // IMPORTANT: Replace this key with your own.
 // https://developers.google.com/maps/documentation/distance-matrix/get-api-key
 // Then scroll to bottom and replace key in async defer script load
-var API_KEY = "AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ";
+// var API_KEY = "AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ";
 //var API_KEY =   "AIzaSyCNTYx3-TqDQXAsvRByPyY48zKIikFmgtc";
 
 
 
 // calculates some Google Map fu
 
-var calculatorCount = 1;
-// Google Maps API magic numbers
-var MERCATOR_RANGE = 256; // Google Maps API magic number
-var HALF_MERCATOR_RANGE = MERCATOR_RANGE / 2;
-
-var pixelsPerLonDegree = MERCATOR_RANGE / 360;
-var pixelsPerLonRadian = MERCATOR_RANGE / (2 * Math.PI);
 var destinationLimit = 25;
 
 
 class Calculator {
   constructor( data ) {
-    this.id = calculatorCount++;   // so old responses can be ignored
+    this.batchId = 0;   // so old responses can be ignored
     this.data = data;
 
-    this.calcMapBounds();
-    this.findAccessibleTravelPoints( this.data.map, this.data.staticMap );
+    this.location = data.targetLocation;
+    this.map = data.map;
+    this.polyColors = data.polyColors;
+    this.gridRadius = data.gridRadius;
+
+    this.rateLimitCounter = 0;
+    this.searchBounds = this.calcSearchBounds( data.searchRadius, data.drawPolyline );
+    this.map.fitBounds( this.searchBounds );
+
+    this.queryTimeout = undefined;
+
+    this.accessMap = new AccessMap();
+
+    this.service = new google.maps.DistanceMatrixService();
   }
 
   get foo() {
     // demo
   }
 
-
-  getStaticMapCorners( lat, lng, zoom, mapWidth, mapHeight ) {
-    var scale = Math.pow( 2, zoom);
-    var centerPixel = this.latLngToPoint(lat, lng);
-
-    var NWPoint = {
-      x: (centerPixel.x - (mapWidth/2)/ scale),
-      y: (centerPixel.y - (mapHeight/2)/ scale)
-    };
-    var NWLatLng = this.pointToLatLng(NWPoint);
-
-    var SEPoint = {
-      x: (centerPixel.x + (mapWidth/2)/ scale),
-      y: (centerPixel.y + (mapHeight/2)/ scale)
-    };
-    var SELatLng = this.pointToLatLng(SEPoint);
-
-    return { northwest: NWLatLng, southeast: SELatLng };
-  }
-
-  staticMapPixel( lat, lng, corners, mapWidth, mapHeight ) {
-    // linear interpolation (which is wrong but we'll start with it)
-    var width = corners.southeast.lng - corners.northwest.lng;
-    var height = corners.northwest.lat - corners.southeast.lat;
-    var x = (lng - corners.northwest.lng) / width;
-    var y = (lat - corners.southeast.lat) / height;
-
-    x = x * mapWidth;
-    y = (1-y) * mapHeight;
-
-    return { x:Math.floor(x), y:Math.floor(y) };
+  calculate() {
+    this.batchId++;
+    this.accessMap.fetchAccessibilityData( this.map )
+      .then( () => {
+        // getTimeZone().then(...);  // if leaveAt or arriveBy is specified.  FIXME
+        this.calculateTargets();
+      });
   }
 
 
-  calcMapBounds() {
-    // hexagon width
-    this.gridInradius = Math.sqrt(3)/2 * this.gridRadius;
+  /** @return vertices of a polygon */
+  getHexagonCoords( center, size ) {
+      var coords = [
+        this.computeOffset( center, 30, size),
+        this.computeOffset( center, 90, size),
+        this.computeOffset( center, 150, size),
+        this.computeOffset( center, 210, size),
+        this.computeOffset( center, 270, size),
+        this.computeOffset( center, 330, size),
+      ];
 
-  // var departFrom = getType() === 'departFrom';
-  // var leaveBy = getTimeType() === 'leaveBy';
-  // var isDriving = getTravelMode() === 'DRIVING';
-  // var isTransit = getTravelMode() === 'TRANSIT';
-  // var advancedSearch = advancedSearchCheck.checked;
+    return coords;
+  };
+
+
+  /** @return magnitude of travel time (to color polygons) */
+  getTravelTimeMagnitudeIndex( travelTimeSeconds ) {
+    var travelTimeThresholds = [ 15, 30, 45, 60, /*75, 90,*/ Infinity ];
+
+    for (var i = 0; i < travelTimeThresholds.length; ++i)
+      if (travelTimeSeconds < travelTimeThresholds[i] * 60)
+        return i;
+
+    return travelTimeThresholds.length - 1;     // should never get here
+  }
+
+
+  // exponential backoff
+  getQueryDelay() {
+    var requestInterval = 1100;  // ms between requests
+
+    return Math.min( Math.pow( 1.5, 1 + this.rateLimitCounter) * requestInterval, 15000);
+  }
+
+  // one query to API?
+  stepQuery( delay ) {
+
+    var leaveAt = this.data.transitTimeType === 'leaveAt';
+    var departFrom = this.data.travelDirection === 'departFrom';
+    var isDriving = this.data.travelMode === google.maps.TravelMode.DRIVING;
+    var isTransit = this.data.travelMode === google.maps.TravelMode.TRANSIT;
+
     var queryTimeUTC = 0;
     var queryTimeDate;
 
+    // Setup queryOrigins and queryDestinations based on query type (departFrom vs arriveAt)
+    var mappedTargets = this.targets.map(e => e.dest);
+    var queryOrigins = departFrom ? [this.location] : this.targets.map(e => e.dest);
+    var queryDestinations = departFrom ? this.targets.map(e=>e.dest) : [this.location];
 
-    this.searchBounds = new google.maps.LatLngBounds( this.data.targetLocation,
-                                                      this.data.targetLocation );
 
-    var path = this.data.drawPolyline.getPath();
+    var i = this.queryIndices.pop();
+    var count = Math.min( this.targets.length - i, destinationLimit);
+
+    var stepOrigins =      departFrom ? queryOrigins : queryOrigins.slice(i, i + count);
+    var stepDestinations = departFrom ? queryDestinations.slice(i, i + count) : queryDestinations;
+
+    var query = {
+      origins: stepOrigins,
+      destinations: stepDestinations,
+      travelMode: this.data.travelMode,
+      transitOptions: { modes: this.data.transitModes },
+      unitSystem: google.maps.UnitSystem.METRIC,
+      avoidHighways: false,
+      avoidTolls: false
+    };
+
+
+    // FIXME, queryTime would be set if timezone offset calculated
+    if (queryTimeUTC != 0) {
+      if (isDriving) {
+        query['drivingOptions'] = {
+          'departureTime': queryTimeDate,
+          'trafficModel': this.data.trafficModel
+        };
+      } else if (isTransit) {
+        var transitTimeType = (leaveAt ? 'departureTime' : 'arrivalTime');
+        query.transitOptions[transitTimeType] = queryTimeDate;
+      }
+    }
+
+    // make the call then wait a bit before doing the next one
+    this.service.getDistanceMatrix(query, this.queryResponseClosure(i));
+
+    // fire a query every second or so
+    if (this.queryIndices.length > 0) {
+      this.queryTimeout = setTimeout(
+        () => { this.stepQuery(); },
+        this.getQueryDelay() );
+    } else {
+      this.queryTimeout = null;
+    }
+  }
+
+
+  // Callback closure for GoogleMapsAPI.distanceMatrix
+  queryResponseClosure( index ) {
+    var idx = index;
+    var batchId = this.batchId;
+
+    return (response, status) => {
+
+      if (this.batchId != batchId)      // Ignore response if it's to an old query
+        return;
+
+      if (status !== 'OK') {
+
+        // Re-request if rate limiter hit
+        if (status === 'OVER_QUERY_LIMIT') {
+          this.rateLimitCounter++;
+          console.log("Unexpected error: [" + status + "] Index: [" + idx +
+                      "]  DelayCount: [" + this.rateLimitCounter + "]");
+          this.queryIndices.push(idx);
+
+          // try again in a bit
+          if (!this.queryTimeout) {
+            this.queryTimeout = setTimeout(
+              () => { this.stepQuery(); },
+              this.getQueryDelay() );
+          }
+        }  else {
+          console.log("Unexpected error: [" + status + "]");
+        }
+
+        return;
+      }
+
+      // good response
+      this.rateLimitCounter = 0;
+
+      // Process results
+      for (var i = 0; i < response.rows.length; i++) {
+        var results = response.rows[i].elements;
+
+        for (var j = 0; j < results.length; j++) {
+
+          var result = results[j];
+          if (result.status !== 'OK') // No route found?
+            continue;
+
+          var travelTime = result.duration_in_traffic ? result.duration_in_traffic.value : result.duration.value;
+
+          var departFrom = this.data.travelDirection === 'departFrom';
+
+          var targetIdx = idx + (departFrom ? j : i);
+          var center = this.targets[targetIdx].polyCenter;
+
+          // FIXME: this seems weird to call out to app
+          var poly = this.data.addHexagonToMap(
+            idx, center, this.getHexagonCoords( center, this.gridRadius ),
+            this.getTravelTimeMagnitudeIndex( travelTime ));
+        }
+      }
+    };
+  }
+
+
+
+
+
+  // find bounding box of drawn outline boundary or square of search radius
+  calcSearchBounds( searchRadius, drawnPolyline) {
+    var searchBounds = new google.maps.LatLngBounds( this.location, this.location );
+
+    var path = drawnPolyline.getPath();
 
     if (path.getLength() > 0) {
       for (var i = 0; i < path.getLength(); ++i) {
-        this.searchBounds.extend(path.getAt(i));
+        searchBounds.extend( path.getAt(i) );
       }
     } else {
-      this.searchBounds.extend(
-        this.computeOffset( this.data.targetLocation, 0, this.searchRadius));
-      this.searchBounds.extend(
-        this.computeOffset( this.data.targetLocation, 90, this.searchRadius));
-      this.searchBounds.extend(
-        this.computeOffset( this.data.targetLocation, 180, this.searchRadius));
-      this.searchBounds.extend(
-        this.computeOffset( this.data.targetLocation, 270, this.searchRadius));
+      searchBounds.extend( this.computeOffset( this.location, 0, searchRadius));
+      searchBounds.extend( this.computeOffset( this.location, 90, searchRadius));
+      searchBounds.extend( this.computeOffset( this.location, 180, searchRadius));
+      searchBounds.extend( this.computeOffset( this.location, 270, searchRadius));
     }
-
-    this.data.map.fitBounds( this.searchBounds );
+    return searchBounds;
   }
 
 
 
-
-  // FIXME - create or access staticMap here.
-  findAccessibleTravelPoints( inMap, inStaticMap ) {
-    // FIXME can all this be its own object?
-
-    // Build a static map URL for detecting water/highways, color them green
-    var mapCenter = {
-      lat: inMap.getCenter().lat(),
-      lng: inMap.getCenter().lng()
-    };
-
-    var locationStr = "\"" + mapCenter.lat + "," + mapCenter.lng + "\"";
-    var imageZoom = inMap.getZoom() - 1;
-    var imagePath ="http://maps.googleapis.com/maps/api/staticmap?scale=2&center=" + locationStr
-          + "&zoom=" + imageZoom
-          + "&size=" + inStaticMap.width + "x" + inStaticMap.height
-          + "&sensor=false&visual_refresh=true"
-          + "&style=feature:water|color:0x00FF00"
-          + "&style=element:labels|visibility:off"
-          + "&style=feature:transit|visibility:off"
-          + "&style=feature:poi|visibility:off"
-          + "&style=feature:administrative|visibility:off"
-          + "&style=feature:transit|visibility:off"
-          + "&style=feature:road.highway|color:0x00FF00";
-
-    // Example imagePath:
-    // http://maps.googleapis.com/maps/api/staticmap?scale=2&center="47.60620999999991,-122.33207357423623"&zoom=14&size=640x640&sensor=false&visual_refresh=true&style=feature:water|color:0x00FF00&style=element:labels|visibility:off&style=feature:transit|visibility:off&style=feature:poi|visibility:off&style=feature:administrative|visibility:off&style=feature:transit|visibility:off&style=feature:road.highway|color:0x00FF00
-
-    var mapMask = new Image();
-    mapMask.crossOrigin = 'http://maps.googleapis.com/crossdomain.xml';
-    mapMask.src = imagePath;
-    var mapMaskCorners = this.getStaticMapCorners(
-      mapCenter.lat, mapCenter.lng, imageZoom,
-      this.data.staticMap.width, this.data.staticMap.height );
-
-    // Commented out markers and debug spew. Useful when mask test isn't working properly.
-    // markersArray.push( new google.maps.Marker({ map: map, icon: destinationIcon, position:searchBounds.getNorthEast() }));
-    // markersArray.push( new google.maps.Marker({ map: map, icon: destinationIcon, position:searchBounds.getSouthWest() }));
-    // console.log( imagePath );
-
-
-    // Callback when static map loaded (google returns data)
-    mapMask.onload = () => {
-
-      // Draw image (hidden) for sampling
-      this.staticMapCanvas.drawImage( mapMask, 0, 0, 640, 640 );
-
-      // var next = advancedSearch ? getTimeZoneOffset : calculateTargets;
-      setTimeout( this.calculateTargetsForTZ, 100);
-    };
-  }
-
-
-  calculateTargetsForTZ() {
+  /**
+   * @return promise that will be called with the local time for the given Longitude
+   */
+  fetchTimeZoneOffset() {
     var utcSeconds = this.travelTime.getTime() / 1000;
 
-    var request = new XMLHttpRequest();
     var url = "https://maps.googleapis.com/maps/api/timezone/json?location=" +
-          this.data.targetLocation.lat + "," + this.data.targetLocation.lng +
+          this.location.lat + "," + this.location.lng +
           "&timestamp=" + utcSeconds + "&key=" + API_KEY;
 
-    request.onload = () => {
-      var response = JSON.parse( request.responseText );
-      var timeOffsetDst = Number( response.dstOffset );
-      var timeOffsetRaw = Number( response.rawOffset );
+    return new Promise( ( resolve, reject ) => {
 
-      // ???  FIXME
-      queryTimeUTC = utcSeconds - (timeOffsetDst + timeOffsetRaw);
-      queryTimeDate = new Date(0);
-      queryTimeDate.setUTCSeconds( queryTimeUTC );
+      window.fetch( url )
+        .then( ( response ) => {
+          debugger  // is response json text or JSON obj? or responseText?
+          // var response = JSON.parse( request.responseText );
 
-      this.calculateTargets();
-    };
+          var timeOffsetDst = Number( response.dstOffset );
+          var timeOffsetRaw = Number( response.rawOffset );
 
-    request.onerror = () => {
-      this.calculateTargets();
-    };
+          // ???  FIXME
+          var queryTimeUTC = utcSeconds - (timeOffsetDst + timeOffsetRaw);
+          var queryTimeDate = new Date(0);
+          queryTimeDate.setUTCSeconds( queryTimeUTC );
 
-    request.open("GET", url, true);
-    request.send();
+          resolve( queryTimeDate );
+        })
+        .catch( (error) => {
+          console.error( error );
+          this.calculateTargets();
+        });
+    });
   }
 
 
-
+  // build grid of hexagons and a point that can be travelled to in each one
   calculateTargets() {
 
-    // Build targets for new queryTimeout
+    // Build targets to query the commute for
     var row = 0;
     var col = 0;
-    var targets = [];
+    var targetLimit = 10000;
+
+    this.targets = [];
+
+    // hexagon circular width
+    var gridInRadius = Math.sqrt(3)/2 * this.gridRadius;
 
     var southwest = this.searchBounds.getSouthWest();
     southwest = { lat:southwest.lat(), lng:southwest.lng() };
@@ -206,51 +287,51 @@ class Calculator {
     for (;;) {
 
       // Calculate center of first hexagon for this row
-      var rowBegin = this.computeOffset(southwest, 0, gridInradius * row);
+      var rowBegin = this.computeOffset(southwest, 0, gridInRadius * row);
       if ((row % 2) == 1)
-        rowBegin = this.computeOffset(rowBegin, 90, gridRadius * 1.5);
+        rowBegin = this.computeOffset(rowBegin, 90, this.gridRadius * 1.5);
 
       if (rowBegin.lat > northeast.lat)
         break;
 
-      if (targets.length > targetLimit) {
+      if (this.targets.length > targetLimit) {
         console.log("ERROR: Exceeded target limit of [" + targetLimit + "]");
         break;
       }
 
       // Column loop
       for (;;) {
-        var polyCenter = this.computeOffset(rowBegin, 90, gridRadius * 3 * col);
-        if (polyCenter.lng > northeast.lng || targets.length > targetLimit)
+        var polyCenter = this.computeOffset(rowBegin, 90, this.gridRadius * 3 * col);
+        if (polyCenter.lng > northeast.lng || this.targets.length > targetLimit)
           break;
 
         // Test point against mask
         var dest = polyCenter;
-        var inaccessible = this.isInaccessible( mapMask, dest.lat, dest.lng, mapMaskCorners, staticMapWidth, staticMapHeight);
+        var inaccessible = this.accessMap.isInaccessible( dest.lat, dest.lng );
 
-        if (masked) {
-          // If center is masked try a few points near the center
-          for (var i = 0; i < 4 && masked; ++i) {
-            dest = computeOffset(polyCenter, 45 + 90*i, gridRadius * .5);
-            masked = isMasked(mapMask, dest.lat, dest.lng, mapMaskCorners, staticMapWidth, staticMapHeight);
+        // If center of hexagon is water or highway, try a few points near the center
+        if (inaccessible) {
+          for (var i = 0; i < 4 && inaccessible; ++i) {
+            dest = this.computeOffset(polyCenter, 45 + 90*i, this.gridRadius * .5);
+            inaccessible = this.accessMap.isInaccessible( dest.lat, dest.lng );
           }
         }
 
-        var path = drawPolyline.getPath();
-        if (!masked && path.getLength() > 0) {
-          if (!pointInPolygon(dest, path.getArray()))
-            masked = true;
+        var path = this.data.drawPolyline.getPath();
+        if (!inaccessible && path.getLength() > 0) {
+          if (!this.pointInPolygon( dest, path.getArray()))
+            inaccessible = true;
         }
 
-        if (!masked && path.getLength() == 0) {
-          var dist = computeDistance(polyCenter, targetLocation);
-          if (dist > searchRadius)
-            masked = true;
+        if (!inaccessible && path.getLength() == 0) {
+          var dist = this.computeDistance(polyCenter, this.location);
+          if (dist > this.data.searchRadius)
+            inaccessible = true;
         }
 
-        if (!masked) {
-          targets.push({dest:dest, polyCenter:polyCenter});
-          searchBounds.extend(polyCenter);
+        if (!inaccessible) {
+          this.targets.push({ dest:dest, polyCenter:polyCenter });
+          this.searchBounds.extend(polyCenter);
         }
 
         col += 1;
@@ -259,23 +340,17 @@ class Calculator {
       row += 1;
       col = 0;
     }
-    map.fitBounds(searchBounds);
 
-    // Setup queryOrigins and queryDestinations based on query type (departFrom vs arriveAt)
-    var mappedTargets = targets.map(e=>e.dest);
-    queryOrigins = departFrom ? [targetLocation] : targets.map(e=>e.dest);
-    queryDestinations = departFrom ? targets.map(e=>e.dest) : [targetLocation];
+    this.map.fitBounds( this.searchBounds );
 
     // Build initial set of indices
-    queryIndices = [];
-    for (var i = 0; i < targets.length; i += destinationLimit)
-      queryIndices.push(i);
+    this.queryIndices = [];
+    for (var i = 0; i < this.targets.length; i += destinationLimit)
+      this.queryIndices.push(i);
 
-    // Begin query
-    stepQuery();
+    // Begin queries
+    this.stepQuery();
   }
-
-
 
 
 
@@ -330,50 +405,15 @@ class Calculator {
     };
   }
 
-  // StaticMap mask utilities
-  latLngToPoint( lat, lng ) {
-    var x = HALF_MERCATOR_RANGE + lng * pixelsPerLonDegree;
-    var siny = Math.sin( this.toRadians( lat ));
-    var y = HALF_MERCATOR_RANGE + 0.5 * Math.log((1 + siny) / (1 - siny)) * -pixelsPerLonRadian;
-    return { x:x, y:y };
+  computeDistance( a, b ) {
+    return google.maps.geometry.spherical.computeDistanceBetween(
+      new google.maps.LatLng( a.lat, a.lng ),
+      new google.maps.LatLng( b.lat, b.lng ));
   }
 
-  pointToLatLng( point ) {
-    var latRadians = (point.y - HALF_MERCATOR_RANGE) / -pixelsPerLonRadian;
-    var lat = this.toDegrees( 2 * Math.atan(Math.exp(latRadians)) - Math.PI / 2);
-    var lng = (point.x - HALF_MERCATOR_RANGE) / pixelsPerLonDegree;
-    return { lat:lat, lng:lng };
-  }
-
-  /**
-   * Green pixels wil be inaccessible (water, highways)
-   * @return true if pixel is green (i.e., not accessible for travel)
-   */
-  isInaccessible( mapMask, lat, lng, corners, mapWidth, mapHeight) {
-
-    var pixel = this.staticMapPixel( lat, lng, corners, mapWidth, mapHeight );
-    if (pixel.x < 0 || pixel.x >= mapWidth ||
-        pixel.y < 0 || pixel.y >= mapHeight) {
-      return false;
-    }
-
-    var pixel_data =
-          this.data.staticMapCanvas.getImageData( pixel.x, pixel.y, 1, 1 );
-    pixel_data = pixel_data.data;
-    var is_green = (pixel_data[0] == 0 &&
-                    pixel_data[1] >= 254 &&
-                    pixel_data[2] == 0);
-    return is_green;
-  }
-
-
-  // Math
-  toRadians( degrees ) { return degrees / 180 * Math.PI; };
-  toDegrees( radians ) { return radians / Math.PI * 180; };
-
-  /** @return navigational vector from location */
-  computeOffset( location, bearing, distance ) {
-    var point = new google.maps.LatLng( location.lat, location.lng );
+  /** @return new location if we travel bearing a distance from startLocation */
+  computeOffset( startLocation, bearing, distance ) {
+    var point = new google.maps.LatLng( startLocation.lat, startLocation.lng );
 
     var dest = google.maps.geometry.spherical.computeOffset(
       point, distance, bearing );
