@@ -37,7 +37,7 @@
 
       <div class="blocks">
         <h3>Travel Mode ({{ travelMode }})</h3>
-        <form id="travelModeForm" onchange="refreshDivs()">
+        <form id="travelModeForm">
           <ul class="radioOptions">
             <li><input type="radio" v-model="travelMode" id="WALKING" value="WALKING"><label for="WALKING">Walking</label>
             </li>
@@ -168,7 +168,7 @@
         </div>
         <div>
           <b>Fill Opacity: </b><input v-model="polyFillOpacity" size="3" type="number" v-on:change="refreshPolyStyle">
-          <b>Border Opacity: </b><input  v-mode="polyStrokeOpacity" size="3" type="number" v-on:change="refreshPolyStyle">
+          <b>Border Opacity: </b><input  v-model="polyStrokeOpacity" size="3" type="number" v-on:change="refreshPolyStyle">
         </div>
         <div><input type="checkbox" id="showMarkerCheck"
                     v-model="showMarker" checked>
@@ -186,7 +186,7 @@
       <button class="btn_pos" title="Click to draw bounds" v-on:click="toggleDrawMode">
         <div class="drawText">
           <span v-if="inDrawMode">Clear</span>
-          <span v-else>Draw</span>
+          <span v-else>Draw Search Area</span>
         </div>
       </div>
     </div>

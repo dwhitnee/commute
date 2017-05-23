@@ -58,8 +58,6 @@ new Vue({
                  /*'#CB55E3', '#3B74ED',*/ '#D3D3D3'],
 
     polyArray: [],                // search result polygons
-    polyInfoWindow: undefined,    // popup when hovering over result polygon
-    polyInfoWindowSource: -1,     // popup source polygon id (why?)
 
     // hidden
     showMarker: true,
@@ -185,8 +183,10 @@ new Vue({
     /**
      * create map polygon, add tooltip with travel time.
      */
-    addHexagonToMap( id, center, vertices, colorIndex, travelTime ) {
+    addHexagonToMap( center, vertices, colorIndex, travelTime ) {
       var color = this.polyColors[colorIndex];
+
+      var minutes = (Math.round((travelTime/60) * 100) / 100).toFixed(1);
 
       var poly = new google.maps.Polygon({
         paths: vertices,
@@ -196,52 +196,40 @@ new Vue({
         fillColor: color,
         fillOpacity: colorIndex < this.polyColors.length - 1 ? this.polyFillOpacity : .35,
         zIndex: -colorIndex,
+
         // user data
-        id: id,
         travelTime: travelTime,
-        center: center
+        center: center,
+        isInfoOpen: false,
+        infoWindow: new google.maps.InfoWindow({
+          content: `${minutes} minutes`,
+          position: center
+        })
       });
 
       this.polyArray.push( poly );
 
       // new hexagon entered, move tooltip to this hexagon and display travel time.
-      var handleMouseOver = function() {
-        var idx = id;
-        var centerCopy = center;
-        var travelTimeCopy = travelTime;
-
-        // this should get it's info from the event, not the closure.  Less messy.
-        return function(e) {
-
-          var poly = this;  // is this really the target here?  FIXME
-
-          if (this.polyInfoWindow.getMap() == null) {
-            if (this.polyInfoWindowSource == -1)
-              this.polyInfoWindow.open( this.map );
-
-            var minutes = (Math.round((travelTimeCopy/60) * 100) / 100).toFixed(2);
-
-            this.polyInfoWindowSource = idx;
-            this.polyInfoWindow.setContent(`${minutes} minutes`);
-            this.polyInfoWindow.setPosition( centerCopy );
-          }
+      var handleMouseOver = function( ev ) {
+        console.log( this.isInfoOpen );
+        if (!this.isInfoOpen) {
+          this.infoWindow.open( this.map );
+          this.isInfoOpen = true;  // really google?
         };
       };
 
-      // hide tooltip if displayed
-      var handleMouseOut = function(e) {
-        var idx = id;
-
-        return function(e) {
-          if (this.polyInfoWindowSource == idx) {
-            this.polyInfoWindow.close();
-            this.polyInfoWindowSource = -1;
-          }
+      // hide tooltip if displayed (this flickers if the infoWindow in
+      // the poly gets hovered over because it triggers mouseout of polygon) Grrrr...
+      var handleMouseOut = function( ev ) {
+        // "this" is the polygon
+        if (this.isInfoOpen) {
+          this.infoWindow.close();
+          this.isInfoOpen = false;
         };
       };
 
-      google.maps.event.addListener( poly, 'mouseover', handleMouseOver() );
-      google.maps.event.addListener( poly, 'mouseout', handleMouseOut() );
+      google.maps.event.addListener( poly, 'mouseover', handleMouseOver );
+      google.maps.event.addListener( poly, 'mouseout', handleMouseOut );
       poly.setMap( this.map );
 
     },
@@ -289,9 +277,6 @@ new Vue({
           zoom: 11,
           clickableIcons: false
         });
-
-      // the one tooltip to hold travel times for each polygon
-      this.polyInfoWindow = new google.maps.InfoWindow({ content: "hello" });
 
       this.setTargetLocation( this.targetLocation );
       this.map.setCenter( this.targetLocation );
@@ -470,12 +455,9 @@ new Vue({
       //   markersArray[i].setMap(null);
       // markersArray = [];
 
-      // for (var i = 0; i < polyArray.length; i++)
-      //   polyArray[i].setMap(null);
-      // polyArray = [];
-
-      this.polyInfoWindow.close();
-      this.polyInfoWindowSource = -1;
+      for (var i = 0; i < this.polyArray.length; i++)
+        this.polyArray[i].setMap(null);
+      this.polyArray = [];
     },
 
     // calculate and color hexagons by travel time

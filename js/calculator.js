@@ -8,8 +8,6 @@
 
 
 
-// calculates some Google Map fu
-
 var destinationLimit = 25;
 
 
@@ -84,7 +82,6 @@ class Calculator {
 
   // one query to API?
   stepQuery( delay ) {
-
     var leaveAt = this.data.transitTimeType === 'leaveAt';
     var departFrom = this.data.travelDirection === 'departFrom';
     var isDriving = this.data.travelMode === google.maps.TravelMode.DRIVING;
@@ -145,6 +142,7 @@ class Calculator {
 
   // Callback closure for GoogleMapsAPI.distanceMatrix
   queryResponseClosure( index ) {
+
     var idx = index;
     var batchId = this.batchId;
 
@@ -197,8 +195,8 @@ class Calculator {
 
           // FIXME: this seems weird to call out to app
           var poly = this.data.addHexagonToMap(
-            idx, center, this.getHexagonCoords( center, this.gridRadius ),
-            this.getTravelTimeMagnitudeIndex( travelTime ));
+            center, this.getHexagonCoords( center, this.gridRadius ),
+            this.getTravelTimeMagnitudeIndex( travelTime ), travelTime );
         }
       }
     };
@@ -319,7 +317,7 @@ class Calculator {
 
         var path = this.data.drawPolyline.getPath();
         if (!inaccessible && path.getLength() > 0) {
-          if (!this.pointInPolygon( dest, path.getArray()))
+          if (!this.isPointInPolygon( dest, path.getArray()))
             inaccessible = true;
         }
 

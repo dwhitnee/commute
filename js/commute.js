@@ -948,7 +948,8 @@ function Calculate() {
           var targetIdx = idx + (departFrom ? j : i);
           var center = targets[targetIdx].polyCenter;
 
-          var poly = drawPoly(center, gridRadius, getTravelTimeThresholdIndex(travelTime));
+          var poly = drawPoly( center, gridRadius, getTravelTimeThresholdIndex(travelTime),
+                               j, travelTime );
 
           var polyEventMouseoverClosure = function() {
             var idx = j;
