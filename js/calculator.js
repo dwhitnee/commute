@@ -1,17 +1,16 @@
-/*global google, AccessMap */
+/*global google, AccessMap, API_KEY */
 
-// IMPORTANT: Replace this key with your own.
-// https://developers.google.com/maps/documentation/distance-matrix/get-api-key
-// Then scroll to bottom and replace key in async defer script load
-// var API_KEY = "AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ";
-//var API_KEY =   "AIzaSyCNTYx3-TqDQXAsvRByPyY48zKIikFmgtc";
-
+// IMPORTANT: API_KEY must be a global defined before this is used.
 
 
 var destinationLimit = 25;
 
+/**
+ *  Calculates the travel time from various map points. It first
+ *  checks that the map points are accessible to a traveller (ie, not water or a freeway)
+ */
 
-class Calculator {
+class TravelTimeCalculator {
   constructor( data ) {
     this.batchId = 0;   // so old responses can be ignored
     this.data = data;
@@ -27,20 +26,20 @@ class Calculator {
 
     this.queryTimeout = undefined;
 
-    this.accessMap = new AccessMap();
+    this.accessMap = new AccessMap();   // will tell us where the water is
 
     this.service = new google.maps.DistanceMatrixService();
-  }
-
-  get foo() {
-    // demo
   }
 
   calculate() {
     this.batchId++;
     this.accessMap.fetchAccessibilityData( this.map )
       .then( () => {
-        // getTimeZone().then(...);  // if leaveAt or arriveBy is specified.  FIXME
+
+        // FIXME
+        // if leaveAt or arriveBy is specified.
+        // this.fetchTimeZoneOffset().then( () => { this.calculateTargets(); });
+
         this.calculateTargets();
       });
   }
@@ -193,7 +192,7 @@ class Calculator {
           var targetIdx = idx + (departFrom ? j : i);
           var center = this.targets[targetIdx].polyCenter;
 
-          // FIXME: this seems weird to call out to app
+          // FIXME: this seems weird to call out to app, should be passed in as a callback
           var poly = this.data.addHexagonToMap(
             center, this.getHexagonCoords( center, this.gridRadius ),
             this.getTravelTimeMagnitudeIndex( travelTime ), travelTime );

@@ -1,5 +1,6 @@
-/*global google, Image */
+/*global google, Image, API_KEY */
 
+// var API_KEY;  must be defined globally
 
 // Google Maps API magic numbers
 var MERCATOR_RANGE = 256; // Google Maps API magic number

@@ -1,8 +1,9 @@
-/*global Vue, google, Calculator */
+/*global Vue, google, TravelTimeCalculator */
 
-// FIXME: move all this poly drawing stuff to another module
-// map too?
-// travel calculator
+/**
+ * This is the VueJS application object. It contains the data (model) that shows up
+ * in the web page whenever it's changed.
+ */
 
 var SEATTLE = { lat:47.60621, lng:-122.332071 };
 
@@ -92,9 +93,6 @@ new Vue({
       if (this.travelMode === "DRIVING") {
         this.transitTimeType = "leaveAt";  // can't use arriveBy for driving
       }
-
-      this.updateURL();    // seems silly to update URL on any change,
-                           // should only be on visualize
     },
 
     // this should be done v=on:change="refreshMarker"?
@@ -171,7 +169,7 @@ new Vue({
     this.initGoogleMaps();
     this.initDrawing();
 
-    // this.parseURL();
+    this.parseURL();
   },
 
 
@@ -340,7 +338,8 @@ new Vue({
     },
 
 
-    // set up whatever drawing means, random polygon search area?
+    // set up freeform lasso drawing, defines the polygon search area
+    // triggered by the button at mapControlDiv
     initDrawing: function() {
       var controlDiv = document.getElementById('mapControlDiv');
 
@@ -418,8 +417,6 @@ new Vue({
         this.map.setOptions({ draggable:true, draggableCursor: null });
         // ??? document.body.classList.remove('blockScroll');
       }
-
-      console.log("Draw mode " + this.inDrawMode );
     },
 
 
@@ -436,11 +433,9 @@ new Vue({
           strokeOpacity: this.polyStrokeOpacity
         } );
       }
-      console.log("Update");
     },
 
-    // wipe map clean of hexagons
-    // should reset data to defaults too FIXME
+    // wipe map clean of hexagons and lasso'ed search area
     clear: function() {
       window.location.hash = "";
 
@@ -451,14 +446,15 @@ new Vue({
       //   queryTimeout = null;
       // }
 
-      // for (var i = 0; i < markersArray.length; i++)
-      //   markersArray[i].setMap(null);
-      // markersArray = [];
+      for (var i = 0; i < this.markersArray.length; i++)
+        this.markersArray[i].setMap(null);
+      this.markersArray = [];
 
       for (var i = 0; i < this.polyArray.length; i++)
         this.polyArray[i].setMap(null);
       this.polyArray = [];
     },
+
 
     // calculate and color hexagons by travel time
     calculate: function() {
@@ -466,9 +462,14 @@ new Vue({
       this.clear();
       this.updateURL();
 
-      // probably should pass in more specific data (map, target, gridRadius, searchRadius, polyLine
-      var calculator = new Calculator( this );
+      // probably should pass in more specific data (map, target,
+      // gridRadius, searchRadius, polyLine
+      var calculator = new TravelTimeCalculator( this );
+
+      // processes the data, then it will call back to
+      // addHexagonToMap() as the data arrives.  Really should pass that in as a param...
       calculator.calculate();
+
     },
 
     // Update page URL when new options are selected
@@ -500,17 +501,22 @@ new Vue({
     },
 
 
+    /** Use the json after the "#" in the URL as our starting data */
     parseURL: function() {
+
       // This might be an attack vector, but that's Google's problem
       var hashArgs = window.location.hash.substring(1);
-      var data;
 
+      if (!hashArgs) {
+        return;
+      }
+
+      var data;
       try {
         data = JSON.parse( hashArgs );
       }
       catch (ex) {
         // doh, bad URL
-        console.error( ex );
         console.log( hashArgs );
         return;
       }

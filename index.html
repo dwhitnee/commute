@@ -14,7 +14,10 @@
     Blog:    blog.forrestthewoods.com/visualizing-commute-times-378009330ffa
     GitHub:  github.com/forrestthewoods/fts_commute_visualizer
 
-  FORK: https://github.com/dwhitnee/commute
+  FORK:
+    David Whitney - port the code to VueJS so it acts more like an app.
+    https://github.com/dwhitnee/commute
+
 -->
 
 
@@ -198,15 +201,12 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.3.2/vue.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
 
- <script>
-  var API_KEY = "AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ";
-  function initialize2() {
-    console.log("well, google loaded...");
-  }
+  <script>
+    var API_KEY = "AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ";
   </script>
 
-  <!-- include google API key here and in commute.js -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ&libraries=places,geometry&&callback=initialize2">
+  <!-- include google API key here and above -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ&libraries=places,geometry">
   </script>
 
   <script src="js/accessMap.js"></script>
