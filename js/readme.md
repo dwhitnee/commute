@@ -1,4 +1,4 @@
-My updates to this code are free to use in educational and not-for-profit projects. See **index.html** for original license.
+My updates to this code are free to use in educational and not-for-profit projects. See **index.html** for original license.  
 May 2017, David Whitney (dwhitnee@gmail.com)
 
 ## VueJS refactor
