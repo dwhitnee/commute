@@ -1,5 +1,6 @@
 ## VueJS refactor
 
+This version is available here: https://dwhitnee.github.io/commute/
 
 I've taken forrestthewoods's original code and refactored it into a VueJS app and several objects including the VueJS **app**, **AccessMap** (to find dry land with roads), and **Travel Calculator** that computes the hexagons and travel times.
 
