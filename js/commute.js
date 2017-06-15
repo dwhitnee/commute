@@ -1,3 +1,6 @@
+//  DEPRECATED original code, see other js files in this directory
+
+
 /*global google */
 
 // IMPORTANT: Replace this key with your own.
