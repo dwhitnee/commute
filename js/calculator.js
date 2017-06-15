@@ -1,15 +1,13 @@
-/*global google, AccessMap */
+/*global google, AccessMap, API_KEY */
 
-// IMPORTANT: Replace this key with your own.
-// https://developers.google.com/maps/documentation/distance-matrix/get-api-key
-// Then scroll to bottom and replace key in async defer script load
-// var API_KEY = "AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ";
-//var API_KEY =   "AIzaSyCNTYx3-TqDQXAsvRByPyY48zKIikFmgtc";
-
-
+// IMPORTANT: API_KEY must be defined globally (see index.html)
 
 var destinationLimit = 25;
 
+/**
+ * Calculate all the travel hexagons and travel times from each hex to
+ * the destiation.
+ */
 
 class Calculator {
   constructor( data ) {
