@@ -1,5 +1,8 @@
 ## VueJS refactor
 
+This code is free to use in educational and not-for-profit projects.
+May 2017, David Whitney (dwhitnee@gmail.com)
+
 This version is available here: https://dwhitnee.github.io/commute/
 
 I've taken forrestthewoods's original code and refactored it into a VueJS app and several objects including the VueJS **app**, **AccessMap** (to find dry land with roads), and **Travel Calculator** that computes the hexagons and travel times.
@@ -15,7 +18,3 @@ You'll need to enable these APIs
 * Google Maps JavaScript API  
 * Distance Matrix API  
 * Google Static Maps API  
-
-This code is free to use in educational and not-for-profit projects.
-
-May 2017, David Whitney (dwhitnee@gmail.com)
