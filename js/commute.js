@@ -1,9 +1,12 @@
+//  DEPRECATED original code, see other js files in this directory
+
+
+
 /*global google */
 
 // IMPORTANT: Replace this key with your own.
 // Then scroll to bottom and replace key in async defer script load
 //var API_KEY = "AIzaSyCNTYx3-TqDQXAsvRByPyY48zKIikFmgtc";
-var API_KEY = "AIzaSyA9x3G3xULG4S_fWrYd6qcBMeyIzlwYXnQ";
 
 // Constants
 var targetLimit = 10000;
